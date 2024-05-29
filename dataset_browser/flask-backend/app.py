@@ -47,6 +47,9 @@ def get_videos():
     if sort_param:
         filtered_df = filtered_df.sort_values(by=sort_param, ascending=(sort_order == 'asc'))
 
+    # Replace NaN values with None
+    filtered_df = filtered_df.where(pd.notnull(filtered_df), None)
+
     return jsonify(filtered_df.to_dict(orient='records'))
 
 if __name__ == '__main__':
