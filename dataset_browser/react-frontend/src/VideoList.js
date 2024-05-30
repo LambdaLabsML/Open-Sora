@@ -88,7 +88,7 @@ const VideoList = () => {
                         const videoUrl = `http://localhost:5000/videos/${encodeURIComponent(video.path)}`;
                         return (
                             <div key={`${video.path}-${index}`} className="video-container">
-                                <video width="640" height="480" controls>
+                                <video width="640" height={`${video.height * 640 / video.width}`} controls>
                                     <source src={videoUrl} type="video/mp4" />
                                     Your browser does not support the video tag.
                                 </video>
