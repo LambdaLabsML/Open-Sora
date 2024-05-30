@@ -1,28 +1,14 @@
-from pathlib import Path
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, Blueprint
 from flask_cors import CORS
 import pandas as pd
 import argparse
 import os
 import cv2
+from pathlib import Path
 from pandarallel import pandarallel
 
-app = Flask(__name__, static_folder='../react-frontend/build', static_url_path='/')
-CORS(app)  # Enable CORS
-
-# Argument parser
-parser = argparse.ArgumentParser(description='Run Flask app with path to CSV directory')
-parser.add_argument('--csv-meta-dir', type=str, required=True, help='Path to the CSV directory')
-parser.add_argument('--video-clip-dir', type=str, required=True, help='Path to the video clip directory')
-args = parser.parse_args()
-
-csv_meta_dir = Path(args.csv_meta_dir)
-video_clip_dir = Path(args.video_clip_dir)
-thumbnail_dir = video_clip_dir.parent / 'thumbnails'
-thumbnail_dir.mkdir(parents=True, exist_ok=True)
-
-# Initialize pandarallel
-pandarallel.initialize(progress_bar=True)
+def initialize_pandarallel():
+    pandarallel.initialize(progress_bar=True)
 
 def load_data(csv_meta_dir):
     df = pd.DataFrame()
@@ -31,7 +17,7 @@ def load_data(csv_meta_dir):
             continue
         df2 = pd.read_csv(csv_file)
         df2.rename(columns={'video': 'path'}, inplace=True)
-        if len(df) == 0:
+        if df.empty:
             df = df2
         else:
             df = pd.merge(df, df2, on='path', how='outer', suffixes=('', '_duplicate'))
@@ -77,7 +63,7 @@ def create_thumbnail(video_path, thumbnail_path):
     except Exception as e:
         print(f"Error creating thumbnail for {video_path}: {e}")
 
-def ensure_thumbnails(video_files):
+def ensure_thumbnails(video_files, thumbnail_dir):
     def process_video_file(video_file):
         thumbnail_path = thumbnail_dir / f"{video_file.stem}.jpg"
         if not thumbnail_path.exists():
@@ -85,53 +71,82 @@ def ensure_thumbnails(video_files):
 
     video_files.parallel_apply(lambda video_file: process_video_file(video_file))
 
-# Load data
-df = load_data(csv_meta_dir)
+def initialize_app(csv_meta_dir, video_clip_dir):
+    thumbnail_dir = video_clip_dir.parent / 'thumbnails'
+    thumbnail_dir.mkdir(parents=True, exist_ok=True)
 
-# Ensure thumbnails are created
-video_files = pd.Series(list(video_clip_dir.glob('*.mp4')))
-print(f"Generating thumbnails for {len(video_files)} video files...")
-ensure_thumbnails(video_files)
+    initialize_pandarallel()
 
-@app.route('/')
-def serve():
-    return send_from_directory(app.static_folder, 'index.html')
+    df = load_data(csv_meta_dir)
 
-@app.route('/videos', methods=['GET'])
-def get_videos():
-    # Get filter and sorting parameters
-    filter_params = request.args.get('filter', default='', type=str)
-    sort_param = request.args.get('sort', default='', type=str)
-    sort_order = request.args.get('order', default='asc', type=str)
-    page = request.args.get('page', default=1, type=int)
-    page_size = request.args.get('page_size', default=10, type=int)
+    video_files = pd.Series(list(video_clip_dir.glob('*.mp4')))
+    print(f"Generating thumbnails for {len(video_files)} video files...")
+    ensure_thumbnails(video_files, thumbnail_dir)
 
-    filtered_df = df
-    if filter_params:
-        for key, value in filter_params.items():
-            filtered_df = filtered_df[filtered_df[key].str.contains(value, case=False)]
+    return df, thumbnail_dir
 
-    if sort_param:
-        filtered_df = filtered_df.sort_values(by=sort_param, ascending=(sort_order == 'asc'))
+def create_app(csv_meta_dir, video_clip_dir):
+    app = Flask(__name__, static_folder='../react-frontend/build', static_url_path='/')
+    CORS(app)
 
-    # Pagination
-    start = (page - 1) * page_size
-    end = start + page_size
-    paginated_df = filtered_df[start:end]
+    df, thumbnail_dir = initialize_app(Path(csv_meta_dir), Path(video_clip_dir))
+    api = Blueprint('api', __name__)
 
-    # Replace NaN values with None
-    paginated_df = paginated_df.where(pd.notnull(paginated_df), None)
+    @api.route('/')
+    def serve():
+        return send_from_directory(app.static_folder, 'index.html')
 
-    return jsonify(paginated_df.to_dict(orient='records'))
+    @api.route('/videos', methods=['GET'])
+    def get_videos():
+        # Get filter and sorting parameters
+        filter_params = request.args.get('filter', default='', type=str)
+        sort_param = request.args.get('sort', default='', type=str)
+        sort_order = request.args.get('order', default='asc', type=str)
+        page = request.args.get('page', default=1, type=int)
+        page_size = request.args.get('page_size', default=10, type=int)
 
-@app.route('/thumbnails/<path:filename>')
-def serve_thumbnail(filename):
-    return send_from_directory(thumbnail_dir, filename)
+        filtered_df = df.copy()
+        if filter_params:
+            filter_params_dict = dict(param.split(':') for param in filter_params.split(','))
+            for key, value in filter_params_dict.items():
+                filtered_df = filtered_df[filtered_df[key].str.contains(value, case=False, na=False)]
 
-@app.route('/videos/<path:filename>')
-def serve_video(filename):
-    # Ensure the filename path is safe and inside the video_clip_dir
-    return send_from_directory(video_clip_dir, filename)
+        if sort_param:
+            filtered_df = filtered_df.sort_values(by=sort_param, ascending=(sort_order == 'asc'))
+
+        # Pagination
+        total_videos = len(filtered_df)
+        start = (page - 1) * page_size
+        end = start + page_size
+        paginated_df = filtered_df[start:end]
+
+        # Replace NaN values with None
+        paginated_df = paginated_df.where(pd.notnull(paginated_df), None)
+
+        return jsonify({
+            'total': total_videos,
+            'page': page,
+            'page_size': page_size,
+            'videos': paginated_df.to_dict(orient='records')
+        })
+
+    @api.route('/thumbnails/<path:filename>')
+    def serve_thumbnail(filename):
+        return send_from_directory(thumbnail_dir, filename)
+
+    @api.route('/videos/<path:filename>')
+    def serve_video(filename):
+        # Ensure the filename path is safe and inside the video_clip_dir
+        return send_from_directory(video_clip_dir, filename)
+
+    app.register_blueprint(api)
+    return app
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Run Flask app with path to CSV directory')
+    parser.add_argument('--csv-meta-dir', type=str, required=True, help='Path to the CSV directory')
+    parser.add_argument('--video-clip-dir', type=str, required=True, help='Path to the video clip directory')
+    args = parser.parse_args()
+
+    app = create_app(args.csv_meta_dir, args.video_clip_dir)
     app.run(host='0.0.0.0', debug=True)

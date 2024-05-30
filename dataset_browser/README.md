@@ -29,5 +29,12 @@ python app.py \
   --video-clip-dir <path_to_your_video_clips_directory>
 ```
 
+#### Serving with Gunicorn
+```bash
+CSV_META_DIR=<path_to_your_meta_directory>
+VIDEO_CLIP_DIR=<path_to_your_video_clips_directory>
+gunicorn -w 4 -b 0.0.0.0:5000 --preload "app:create_app('$CSV_META_DIR', '$VIDEO_CLIP_DIR')"
+```
+
 ## Usage
 Open [http://localhost:5000](http://localhost:5000) to view the dataset browser in your browser.

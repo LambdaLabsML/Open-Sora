@@ -1,5 +1,6 @@
 Flask
 flask-cors
+gunicorn
 opencv-python
 pandarallel
 pandas

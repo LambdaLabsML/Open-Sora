@@ -11,6 +11,7 @@ const VideoList = () => {
     const [order, setOrder] = useState('desc');
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [playingVideo, setPlayingVideo] = useState(null);
 
     const API_URL = process.env.REACT_APP_API_URL;
@@ -21,28 +22,31 @@ const VideoList = () => {
     }, [filter, sort, order]);
 
     const fetchVideos = (pageNumber = 1) => {
+        setLoading(true);
         axios.get(`${API_URL}/videos`, {
             params: { filter, sort, order, page: pageNumber, page_size: PAGE_SIZE }
         })
             .then(response => {
-                if (response.data.length < PAGE_SIZE) {
+                if (response.data.videos.length < PAGE_SIZE) {
                     setHasMore(false);
                 }
                 if (pageNumber === 1) {
-                    setVideos(response.data);
+                    setVideos(response.data.videos);
                 } else {
-                    setVideos(prevVideos => [...prevVideos, ...response.data]);
+                    setVideos(prevVideos => [...prevVideos, ...response.data.videos]);
                 }
+                setPage(pageNumber);
             })
             .catch(error => {
                 console.error('Error fetching videos:', error);
+            })
+            .finally(() => {
+                setLoading(false);
             });
     };
 
     const loadMoreVideos = () => {
-        const nextPage = page + 1;
-        setPage(nextPage);
-        fetchVideos(nextPage);
+        fetchVideos(page + 1);
     };
 
     const handleFilterChange = (e) => {
@@ -53,10 +57,14 @@ const VideoList = () => {
 
     const handleSortChange = (e) => {
         setSort(e.target.value);
+        setPage(1);  // Reset to first page on sort change
+        setHasMore(true);
     };
 
     const handleOrderChange = (e) => {
         setOrder(e.target.value);
+        setPage(1);  // Reset to first page on order change
+        setHasMore(true);
     };
 
     const handleThumbnailClick = (videoUrl) => {
@@ -79,7 +87,6 @@ const VideoList = () => {
                 <label>
                     Sort By:
                     <select value={sort} onChange={handleSortChange}>
-                        <option value="">None</option>
                         <option value="path">Filename</option>
                         <option value="num_frames">Number of Frames</option>
                         <option value="aes">AES</option>
@@ -98,6 +105,7 @@ const VideoList = () => {
                     </select>
                 </label>
             </div>
+            {loading && <p>Loading...</p>}
             <InfiniteScroll
                 dataLength={videos.length}
                 next={loadMoreVideos}
