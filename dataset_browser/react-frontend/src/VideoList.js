@@ -121,7 +121,14 @@ const VideoList = () => {
                                                 Your browser does not support the video tag.
                                             </video>
                                         ) : (
-                                            <img src={thumbnailUrl} alt={video.path} width="640" height={video.height * 640 / video.width} />
+                                            <div className="thumbnail-container">
+                                                <img src={thumbnailUrl} alt={video.path} width="640" height={video.height * 640 / video.width} />
+                                                <div className="play-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64">
+                                                        <path fill="rgba(255, 255, 255, 0.7)" d="M8 5v14l11-7z"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
                                         )}
                                         <div className="video-metadata">
                                             <p className="metadata-item"><span>Filename:</span> {video.path}</p>
