@@ -1,25 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './VideoList.css';  // Import the CSS file
+import InfiniteScroll from 'react-infinite-scroll-component';
+import LazyLoad from 'react-lazyload';
+import './VideoList.css';
 
 const VideoList = () => {
     const [videos, setVideos] = useState([]);
     const [filter, setFilter] = useState('');
     const [sort, setSort] = useState('');
     const [order, setOrder] = useState('asc');
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [playingVideo, setPlayingVideo] = useState(null);
+
+    const API_URL = process.env.REACT_APP_API_URL;
+    const PAGE_SIZE = 10;
 
     useEffect(() => {
-        axios.get('http://localhost:5000/videos')
+        fetchVideos();
+    }, [filter, sort, order]);
+
+    const fetchVideos = (pageNumber = 1) => {
+        axios.get(`${API_URL}/videos`, {
+            params: { filter, sort, order, page: pageNumber, page_size: PAGE_SIZE }
+        })
             .then(response => {
-                setVideos(response.data);
+                if (response.data.length < PAGE_SIZE) {
+                    setHasMore(false);
+                }
+                if (pageNumber === 1) {
+                    setVideos(response.data);
+                } else {
+                    setVideos(prevVideos => [...prevVideos, ...response.data]);
+                }
             })
             .catch(error => {
                 console.error('Error fetching videos:', error);
             });
-    }, []);
+    };
+
+    const loadMoreVideos = () => {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchVideos(nextPage);
+    };
 
     const handleFilterChange = (e) => {
         setFilter(e.target.value);
+        setPage(1);  // Reset to first page on filter change
+        setHasMore(true);
     };
 
     const handleSortChange = (e) => {
@@ -30,20 +59,9 @@ const VideoList = () => {
         setOrder(e.target.value);
     };
 
-    const filteredVideos = videos.filter(video =>
-        video.path.toLowerCase().includes(filter.toLowerCase())
-    );
-
-    const sortedVideos = [...filteredVideos].sort((a, b) => {
-        if (sort) {
-            if (order === 'asc') {
-                return a[sort] > b[sort] ? 1 : -1;
-            } else {
-                return a[sort] < b[sort] ? 1 : -1;
-            }
-        }
-        return 0;
-    });
+    const handleThumbnailClick = (videoUrl) => {
+        setPlayingVideo(videoUrl);
+    };
 
     return (
         <div className="container">
@@ -80,34 +98,49 @@ const VideoList = () => {
                     </select>
                 </label>
             </div>
-            <div>
-                {sortedVideos.length === 0 ? (
-                    <p>No videos found</p>
-                ) : (
-                    sortedVideos.map((video, index) => {
-                        const videoUrl = `http://localhost:5000/videos/${encodeURIComponent(video.path)}`;
-                        return (
-                            <div key={`${video.path}-${index}`} className="video-container">
-                                <video width="640" height={`${video.height * 640 / video.width}`} controls>
-                                    <source src={videoUrl} type="video/mp4" />
-                                    Your browser does not support the video tag.
-                                </video>
-                                <div className="video-metadata">
-                                    <p className="metadata-item"><span>Filename:</span> {video.path}</p>
-                                    <p className="metadata-item"><span>AES:</span> {video.aes}</p>
-                                    <p className="metadata-item"><span>Aspect Ratio:</span> {video.aspect_ratio}</p>
-                                    <p className="metadata-item"><span>FPS:</span> {video.fps}</p>
-                                    <p className="metadata-item"><span>Height:</span> {video.height}</p>
-                                    <p className="metadata-item"><span>Number of Frames:</span> {video.num_frames}</p>
-                                    <p className="metadata-item"><span>Resolution:</span> {video.resolution}</p>
-                                    <p className="metadata-item"><span>Text:</span> {video.text}</p>
-                                    <p className="metadata-item"><span>Width:</span> {video.width}</p>
-                                </div>
-                            </div>
-                        );
-                    })
-                )}
-            </div>
+            <InfiniteScroll
+                dataLength={videos.length}
+                next={loadMoreVideos}
+                hasMore={hasMore}
+                loader={<h4>Loading...</h4>}
+                endMessage={<p style={{ textAlign: 'center' }}><b>Yay! You have seen it all</b></p>}
+            >
+                <div>
+                    {videos.length === 0 ? (
+                        <p>No videos found</p>
+                    ) : (
+                        videos.map((video, index) => {
+                            const videoUrl = `${API_URL}/videos/${encodeURIComponent(video.path)}`;
+                            const thumbnailUrl = `${API_URL}/thumbnails/${encodeURIComponent(video.path.replace('.mp4', '.jpg'))}`;
+                            return (
+                                <LazyLoad key={`${video.path}-${index}`} height={200} offset={100} once>
+                                    <div className="video-container" onClick={() => handleThumbnailClick(videoUrl)}>
+                                        {playingVideo === videoUrl ? (
+                                            <video width="640" height={video.height * 640 / video.width} controls autoPlay>
+                                                <source src={videoUrl} type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        ) : (
+                                            <img src={thumbnailUrl} alt={video.path} width="640" height={video.height * 640 / video.width} />
+                                        )}
+                                        <div className="video-metadata">
+                                            <p className="metadata-item"><span>Filename:</span> {video.path}</p>
+                                            <p className="metadata-item"><span>AES:</span> {video.aes}</p>
+                                            <p className="metadata-item"><span>Aspect Ratio:</span> {video.aspect_ratio}</p>
+                                            <p className="metadata-item"><span>FPS:</span> {video.fps}</p>
+                                            <p className="metadata-item"><span>Height:</span> {video.height}</p>
+                                            <p className="metadata-item"><span>Number of Frames:</span> {video.num_frames}</p>
+                                            <p className="metadata-item"><span>Resolution:</span> {video.resolution}</p>
+                                            <p className="metadata-item"><span>Text:</span> {video.text}</p>
+                                            <p className="metadata-item"><span>Width:</span> {video.width}</p>
+                                        </div>
+                                    </div>
+                                </LazyLoad>
+                            );
+                        })
+                    )}
+                </div>
+            </InfiniteScroll>
         </div>
     );
 };

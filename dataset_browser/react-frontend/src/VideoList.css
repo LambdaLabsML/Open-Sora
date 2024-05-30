@@ -11,9 +11,10 @@
     border-radius: 8px;
     background-color: #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
 }
 
-video {
+video, img {
     display: block;
     margin: 0 auto 20px;
     max-width: 100%;
