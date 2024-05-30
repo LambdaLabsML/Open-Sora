@@ -9,19 +9,14 @@ const VideoList = () => {
     const [order, setOrder] = useState('asc');
 
     useEffect(() => {
-        axios.get('http://localhost:5000/videos', {
-            params: {
-                filter: filter,
-                sort: sort,
-                order: order
-            }
-        }).then(response => {
-            console.log('Fetched videos:', response.data);
-            setVideos(response.data);
-        }).catch(error => {
-            console.error('Error fetching videos:', error);
-        });
-    }, [filter, sort, order]);
+        axios.get('http://localhost:5000/videos')
+            .then(response => {
+                setVideos(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching videos:', error);
+            });
+    }, []);
 
     const handleFilterChange = (e) => {
         setFilter(e.target.value);
@@ -35,12 +30,50 @@ const VideoList = () => {
         setOrder(e.target.value);
     };
 
+    const filteredVideos = videos.filter(video =>
+        video.path.toLowerCase().includes(filter.toLowerCase())
+    );
+
+    const sortedVideos = [...filteredVideos].sort((a, b) => {
+        if (sort) {
+            if (order === 'asc') {
+                return a[sort] > b[sort] ? 1 : -1;
+            } else {
+                return a[sort] < b[sort] ? 1 : -1;
+            }
+        }
+        return 0;
+    });
+
     return (
-        <div>
-            <div>
-                <label>Filter: <input type="text" value={filter} onChange={handleFilterChange} /></label>
-                <label>Sort By: <input type="text" value={sort} onChange={handleSortChange} /></label>
-                <label>Order:
+        <div className="container">
+            <h1>Video Clips</h1>
+            <div className="filter-container">
+                <label>
+                    Filter:
+                    <input
+                        type="text"
+                        value={filter}
+                        onChange={handleFilterChange}
+                        placeholder="Search by filename"
+                    />
+                </label>
+                <label>
+                    Sort By:
+                    <select value={sort} onChange={handleSortChange}>
+                        <option value="">None</option>
+                        <option value="path">Filename</option>
+                        <option value="num_frames">Number of Frames</option>
+                        <option value="aes">AES</option>
+                        <option value="aspect_ratio">Aspect Ratio</option>
+                        <option value="fps">FPS</option>
+                        <option value="height">Height</option>
+                        <option value="resolution">Resolution</option>
+                        <option value="width">Width</option>
+                    </select>
+                </label>
+                <label>
+                    Order:
                     <select value={order} onChange={handleOrderChange}>
                         <option value="asc">Ascending</option>
                         <option value="desc">Descending</option>
@@ -48,22 +81,27 @@ const VideoList = () => {
                 </label>
             </div>
             <div>
-                {videos.length === 0 ? (
+                {sortedVideos.length === 0 ? (
                     <p>No videos found</p>
                 ) : (
-                    videos.map((video, index) => {
+                    sortedVideos.map((video, index) => {
                         const videoUrl = `http://localhost:5000/videos/${encodeURIComponent(video.path)}`;
-                        console.log(`Rendering video URL: ${videoUrl}`);
                         return (
                             <div key={`${video.path}-${index}`} className="video-container">
-                                <video width="320" height="240" controls>
+                                <video width="640" height="480" controls>
                                     <source src={videoUrl} type="video/mp4" />
                                     Your browser does not support the video tag.
                                 </video>
                                 <div className="video-metadata">
-                                    {Object.keys(video).map(key => (
-                                        key !== 'path' && <p key={`${key}-${index}`}>{key}: {video[key]}</p>
-                                    ))}
+                                    <p className="metadata-item"><span>Filename:</span> {video.path}</p>
+                                    <p className="metadata-item"><span>AES:</span> {video.aes}</p>
+                                    <p className="metadata-item"><span>Aspect Ratio:</span> {video.aspect_ratio}</p>
+                                    <p className="metadata-item"><span>FPS:</span> {video.fps}</p>
+                                    <p className="metadata-item"><span>Height:</span> {video.height}</p>
+                                    <p className="metadata-item"><span>Number of Frames:</span> {video.num_frames}</p>
+                                    <p className="metadata-item"><span>Resolution:</span> {video.resolution}</p>
+                                    <p className="metadata-item"><span>Text:</span> {video.text}</p>
+                                    <p className="metadata-item"><span>Width:</span> {video.width}</p>
                                 </div>
                             </div>
                         );
