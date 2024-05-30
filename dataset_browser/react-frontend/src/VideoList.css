@@ -1,0 +1,14 @@
+/* VideoList.css */
+.video-container {
+    margin: 20px 0;
+    text-align: center;
+}
+
+video {
+    display: block;
+    margin: 0 auto;
+}
+
+.video-metadata {
+    text-align: center;
+}

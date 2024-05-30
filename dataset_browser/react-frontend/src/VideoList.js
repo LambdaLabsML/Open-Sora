@@ -1,6 +1,6 @@
-// src/VideoList.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './VideoList.css';  // Import the CSS file
 
 const VideoList = () => {
     const [videos, setVideos] = useState([]);
@@ -9,13 +9,14 @@ const VideoList = () => {
     const [order, setOrder] = useState('asc');
 
     useEffect(() => {
-        axios.get('/videos', {
+        axios.get('http://localhost:5000/videos', {
             params: {
                 filter: filter,
                 sort: sort,
                 order: order
             }
         }).then(response => {
+            console.log('Fetched videos:', response.data);
             setVideos(response.data);
         }).catch(error => {
             console.error('Error fetching videos:', error);
@@ -47,19 +48,27 @@ const VideoList = () => {
                 </label>
             </div>
             <div>
-                {videos.map(video => (
-                    <div key={video.path}>
-                        <video width="320" height="240" controls>
-                            <source src={video.path} type="video/mp4" />
-                            Your browser does not support the video tag.
-                        </video>
-                        <div>
-                            {Object.keys(video).map(key => (
-                                key !== 'path' && <p key={key}>{key}: {video[key]}</p>
-                            ))}
-                        </div>
-                    </div>
-                ))}
+                {videos.length === 0 ? (
+                    <p>No videos found</p>
+                ) : (
+                    videos.map((video, index) => {
+                        const videoUrl = `http://localhost:5000/videos/${encodeURIComponent(video.path)}`;
+                        console.log(`Rendering video URL: ${videoUrl}`);
+                        return (
+                            <div key={`${video.path}-${index}`} className="video-container">
+                                <video width="320" height="240" controls>
+                                    <source src={videoUrl} type="video/mp4" />
+                                    Your browser does not support the video tag.
+                                </video>
+                                <div className="video-metadata">
+                                    {Object.keys(video).map(key => (
+                                        key !== 'path' && <p key={`${key}-${index}`}>{key}: {video[key]}</p>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
             </div>
         </div>
     );

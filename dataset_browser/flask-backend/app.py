@@ -1,17 +1,21 @@
 from pathlib import Path
-
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
 import pandas as pd
 import argparse
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS
 
 # Argument parser
 parser = argparse.ArgumentParser(description='Run Flask app with path to CSV directory')
 parser.add_argument('--csv-meta-dir', type=str, required=True, help='Path to the CSV directory')
+parser.add_argument('--video-clip-dir', type=str, required=True, help='Path to the video clip directory')
 args = parser.parse_args()
 
 csv_meta_dir = Path(args.csv_meta_dir)
+video_clip_dir = Path(args.video_clip_dir)
+
 def load_data(csv_meta_dir):
     df = pd.DataFrame()
     for csv_file in csv_meta_dir.glob('*.csv'):
@@ -28,6 +32,10 @@ def load_data(csv_meta_dir):
                 if column.endswith('_duplicate'):
                     df.drop(columns=[column], inplace=True)
     df.dropna(subset=['num_frames'], inplace=True)
+
+    # Convert paths to be relative to the video_clip_dir
+    df['path'] = df['path'].apply(lambda x: Path(x).name)
+
     return df
 
 df = load_data(csv_meta_dir)
@@ -51,6 +59,11 @@ def get_videos():
     filtered_df = filtered_df.where(pd.notnull(filtered_df), None)
 
     return jsonify(filtered_df.to_dict(orient='records'))
+
+@app.route('/videos/<path:filename>')
+def serve_video(filename):
+    # Ensure the filename path is safe and inside the csv_meta_dir
+    return send_from_directory(video_clip_dir, filename)
 
 if __name__ == '__main__':
     app.run(debug=True)
