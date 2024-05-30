@@ -116,11 +116,7 @@ const VideoList = () => {
                                 <LazyLoad key={`${video.path}-${index}`} height={200} offset={100} once>
                                     <div className="video-container" onClick={() => handleThumbnailClick(videoUrl)}>
                                         {playingVideo === videoUrl ? (
-                                            <video
-                                                width="100%"
-                                                controls
-                                                autoPlay
-                                            >
+                                            <video width="100%" controls autoPlay className="video-player">
                                                 <source src={videoUrl} type="video/mp4" />
                                                 Your browser does not support the video tag.
                                             </video>

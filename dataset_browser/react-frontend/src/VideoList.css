@@ -13,13 +13,14 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     cursor: pointer;
     position: relative;
-    text-align: center;
+    overflow: hidden; /* Ensure the thumbnail and video stay within the container */
 }
 
 .thumbnail-container {
     position: relative;
-    display: inline-block;
+    display: block;
     width: 100%;
+    height: auto;
 }
 
 .play-icon {
@@ -36,13 +37,14 @@
     opacity: 1;
 }
 
-video, img {
+.video-player, img {
     display: block;
-    margin: 0 auto 20px;
-    width: 100%;
-    height: auto;
+    margin: 0 auto;
+    max-width: 100%;
     border: 1px solid #ccc;
     border-radius: 4px;
+    width: 100%; /* Ensure video fills the container */
+    height: auto;
 }
 
 .video-metadata {
