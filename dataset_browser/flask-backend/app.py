@@ -63,6 +63,14 @@ def create_thumbnail(video_path, thumbnail_path):
         # Read the frame
         ret, frame = cap.read()
         if ret:
+            # Downscale the frame if the width is greater than 640
+            height, width, _ = frame.shape
+            if width > 640:
+                scaling_factor = 640 / width
+                new_width = 640
+                new_height = int(height * scaling_factor)
+                frame = cv2.resize(frame, (new_width, new_height), interpolation=cv2.INTER_AREA)
+
             # Save the frame as an image
             cv2.imwrite(str(thumbnail_path), frame)
         cap.release()
