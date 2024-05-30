@@ -15,6 +15,11 @@ npm ci
 npm run build
 ```
 
+#### If running non-locally, set the backend host URL when building, e.g:
+```bash
+REACT_APP_API_URL=http://192.168.48.123:5000 npm run build
+````
+
 ### Start the Flask backend
 ```bash
 cd flask-backend
