@@ -116,13 +116,22 @@ const VideoList = () => {
                                 <LazyLoad key={`${video.path}-${index}`} height={200} offset={100} once>
                                     <div className="video-container" onClick={() => handleThumbnailClick(videoUrl)}>
                                         {playingVideo === videoUrl ? (
-                                            <video width="640" height={video.height * 640 / video.width} controls autoPlay>
+                                            <video
+                                                width="100%"
+                                                controls
+                                                autoPlay
+                                                style={{ aspectRatio: `${video.width} / ${video.height}` }}
+                                            >
                                                 <source src={videoUrl} type="video/mp4" />
                                                 Your browser does not support the video tag.
                                             </video>
                                         ) : (
                                             <div className="thumbnail-container">
-                                                <img src={thumbnailUrl} alt={video.path} width="640" height={video.height * 640 / video.width} />
+                                                <img
+                                                    src={thumbnailUrl}
+                                                    alt={video.path}
+                                                    style={{ aspectRatio: `${video.width} / ${video.height}` }}
+                                                />
                                                 <div className="play-icon">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64">
                                                         <path fill="rgba(255, 255, 255, 0.7)" d="M8 5v14l11-7z"/>
