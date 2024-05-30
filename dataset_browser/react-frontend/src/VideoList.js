@@ -7,8 +7,8 @@ import './VideoList.css';
 const VideoList = () => {
     const [videos, setVideos] = useState([]);
     const [filter, setFilter] = useState('');
-    const [sort, setSort] = useState('');
-    const [order, setOrder] = useState('asc');
+    const [sort, setSort] = useState('aes');
+    const [order, setOrder] = useState('desc');
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [playingVideo, setPlayingVideo] = useState(null);
@@ -120,7 +120,6 @@ const VideoList = () => {
                                                 width="100%"
                                                 controls
                                                 autoPlay
-                                                style={{ aspectRatio: `${video.width} / ${video.height}` }}
                                             >
                                                 <source src={videoUrl} type="video/mp4" />
                                                 Your browser does not support the video tag.
@@ -130,7 +129,8 @@ const VideoList = () => {
                                                 <img
                                                     src={thumbnailUrl}
                                                     alt={video.path}
-                                                    style={{ aspectRatio: `${video.width} / ${video.height}` }}
+                                                    width="100%"
+                                                    height="auto"
                                                 />
                                                 <div className="play-icon">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64">
