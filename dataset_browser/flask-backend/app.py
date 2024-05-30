@@ -4,7 +4,7 @@ from flask_cors import CORS
 import pandas as pd
 import argparse
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../react-frontend/build', static_url_path='/')
 CORS(app)  # Enable CORS
 
 # Argument parser
@@ -39,6 +39,10 @@ def load_data(csv_meta_dir):
     return df
 
 df = load_data(csv_meta_dir)
+
+@app.route('/')
+def serve():
+    return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/videos', methods=['GET'])
 def get_videos():
