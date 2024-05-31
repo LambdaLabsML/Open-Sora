@@ -86,10 +86,7 @@ def create_thumbnail(video_path, thumbnail_path):
 
 def ensure_thumbnails(video_files, thumbnail_dir):
     logger.debug(f"ensure_thumbnails(len(video_files)={len(video_files)}, thumbnail_dir={thumbnail_dir})")
-    for video_file in video_files:
-        thumbnail_path = thumbnail_dir / f"{video_file.stem}.jpg"
-        if not thumbnail_path.exists():
-            create_thumbnail(video_file, thumbnail_path)
+    video_files.parallel_apply(lambda video_file: create_thumbnail(video_file, thumbnail_dir / f"{video_file.stem}.jpg"))
 
 def get_caption_category(text):
     if not text or pd.isna(text):
@@ -110,7 +107,7 @@ def initialize_dataset(name, author, csv_meta_dir, video_clip_dir, description='
 
     initialize_pandarallel()
     df = load_data(Path(csv_meta_dir))
-    video_files = list(Path(video_clip_dir).glob('*.mp4'))
+    video_files = pd.Series(list(Path(video_clip_dir).glob('*.mp4')))
     ensure_thumbnails(video_files, thumbnail_dir)
 
     dataset = {
