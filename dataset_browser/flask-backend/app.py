@@ -1,18 +1,51 @@
 from flask import Flask, jsonify, request, send_from_directory, Blueprint
 from flask_cors import CORS
 import pandas as pd
-import argparse
 import os
 import cv2
 from pathlib import Path
 from pandarallel import pandarallel
+import uuid
+from datetime import datetime
+import json
+import logging
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    handlers=[
+                        logging.FileHandler("app.log"),
+                        logging.StreamHandler()
+                    ])
+
+# Create a logger
+logger = logging.getLogger(__name__)
+
+app = Flask(__name__, static_folder='../react-frontend/build', static_url_path='/')
+CORS(app)
+
+DATASETS_FILE = 'datasets.json'
+
+def load_datasets():
+    if not os.path.exists(DATASETS_FILE):
+        logger.debug("load_datasets - datasets.json file not found")
+        return {}
+    with open(DATASETS_FILE, 'r') as f:
+        datasets = json.load(f)
+        logger.debug(f"load_datasets - {len(datasets)} records loaded from'{Path(DATASETS_FILE).absolute()}'")
+        return datasets
+
+def save_datasets(datasets):
+    with open(DATASETS_FILE, 'w') as f:
+        json.dump(datasets, f, indent=4)
+        logger.debug(f"save_datasets - {len(datasets)} records saved to'{Path(DATASETS_FILE).absolute()}'")
 
 def initialize_pandarallel():
     pandarallel.initialize(progress_bar=True)
 
 def load_data(csv_meta_dir):
+    logger.debug(f"load_data(csv_meta_dir={csv_meta_dir})")
     df = pd.DataFrame()
-    for csv_file in csv_meta_dir.glob('*.csv'):
+    for csv_file in Path(csv_meta_dir).glob('*.csv'):
         if csv_file.name in ['meta_info_fmin1_timestamp.csv', 'meta_info_fmin1.csv']:
             continue
         df2 = pd.read_csv(csv_file)
@@ -21,20 +54,13 @@ def load_data(csv_meta_dir):
             df = df2
         else:
             df = pd.merge(df, df2, on='path', how='outer', suffixes=('', '_duplicate'))
-            # Drop duplicate columns
             for column in df.columns:
                 if column.endswith('_duplicate'):
                     df.drop(columns=[column], inplace=True)
     df.dropna(subset=['num_frames'], inplace=True)
-
-    # Convert paths to be relative to the video_clip_dir
     df['path'] = df['path'].apply(lambda x: Path(x).name)
-
-    # Calculate caption categories
     df['caption_category'] = df['text'].apply(get_caption_category)
-
     return df
-
 
 def create_thumbnail(video_path, thumbnail_path):
     try:
@@ -42,38 +68,28 @@ def create_thumbnail(video_path, thumbnail_path):
         if not cap.isOpened():
             print(f"Error opening video file {video_path}")
             return
-
-        # Get the total number of frames
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         middle_frame = total_frames // 2
-
-        # Set the frame position to the middle frame
         cap.set(cv2.CAP_PROP_POS_FRAMES, middle_frame)
-
-        # Read the frame
         ret, frame = cap.read()
         if ret:
-            # Downscale the frame if the width is greater than 640
             height, width, _ = frame.shape
             if width > 640:
                 scaling_factor = 640 / width
                 new_width = 640
                 new_height = int(height * scaling_factor)
                 frame = cv2.resize(frame, (new_width, new_height), interpolation=cv2.INTER_AREA)
-
-            # Save the frame as an image
             cv2.imwrite(str(thumbnail_path), frame)
         cap.release()
     except Exception as e:
         print(f"Error creating thumbnail for {video_path}: {e}")
 
 def ensure_thumbnails(video_files, thumbnail_dir):
-    def process_video_file(video_file):
+    logger.debug(f"ensure_thumbnails(len(video_files)={len(video_files)}, thumbnail_dir={thumbnail_dir})")
+    for video_file in video_files:
         thumbnail_path = thumbnail_dir / f"{video_file.stem}.jpg"
         if not thumbnail_path.exists():
             create_thumbnail(video_file, thumbnail_path)
-
-    video_files.parallel_apply(lambda video_file: process_video_file(video_file))
 
 def get_caption_category(text):
     if not text or pd.isna(text):
@@ -86,143 +102,149 @@ def get_caption_category(text):
         return 'no_movement'
     return 'accepted'
 
-
-def initialize_app(csv_meta_dir, video_clip_dir):
-    thumbnail_dir = video_clip_dir.parent / 'thumbnails'
+def initialize_dataset(name, author, csv_meta_dir, video_clip_dir, description=''):
+    logger.debug(f"initialize_dataset(name={name}, author={author}, csv_meta_dir={csv_meta_dir}, video_clip_dir={video_clip_dir}, description={description})")
+    dataset_id = str(uuid.uuid4())
+    thumbnail_dir = Path(video_clip_dir).parent / f'thumbnails_{name}'
     thumbnail_dir.mkdir(parents=True, exist_ok=True)
 
     initialize_pandarallel()
-
-    df = load_data(csv_meta_dir)
-
-    video_files = pd.Series(list(video_clip_dir.glob('*.mp4')))
-    print(f"Generating thumbnails for {len(video_files)} video files...")
+    df = load_data(Path(csv_meta_dir))
+    video_files = list(Path(video_clip_dir).glob('*.mp4'))
     ensure_thumbnails(video_files, thumbnail_dir)
 
-    return df, thumbnail_dir
+    dataset = {
+        'id': str(dataset_id),
+        'name': name,
+        'author': author,
+        'csv_meta_dir': csv_meta_dir,
+        'video_clip_dir': video_clip_dir,
+        'thumbnail_dir': str(thumbnail_dir),
+        'created_at': datetime.utcnow().isoformat(),
+        'description': description,
+        'status': 'created'
+    }
 
-def create_app(csv_meta_dir, video_clip_dir):
-    app = Flask(__name__, static_folder='../react-frontend/build', static_url_path='/')
-    CORS(app)
+    datasets = load_datasets()
+    datasets[str(dataset_id)] = dataset
+    save_datasets(datasets)
 
-    df, thumbnail_dir = initialize_app(Path(csv_meta_dir), Path(video_clip_dir))
-    api = Blueprint('api', __name__)
+    return dataset
 
-    @api.route('/')
-    def serve():
-        return send_from_directory(app.static_folder, 'index.html')
+api = Blueprint('api', __name__)
 
-    @api.route('/videos', methods=['GET'])
-    def get_videos():
+@api.route('/datasets', methods=['GET'])
+def get_datasets():
+    datasets = load_datasets()
+    return jsonify(list(datasets.values()))
 
-        # Parse filters
-        filters = {}
-        for key, values in request.args.items():
-            if key.startswith('filters['):
-                key_parts = key.split('[')
-                filter_key = key_parts[1].rstrip(']')
-                sub_key = key_parts[2].rstrip(']')
+@api.route('/datasets', methods=['POST'])
+def create_dataset():
+    data = request.json
+    name = data['name']
+    author = data['author']
+    csv_meta_dir = data['csv_meta_dir']
+    video_clip_dir = data['video_clip_dir']
+    description = data.get('description', '')
+    dataset = initialize_dataset(name, author, csv_meta_dir, video_clip_dir, description)
+    return jsonify({'message': 'Dataset creation started', 'dataset': dataset}), 202
 
-                if filter_key not in filters:
-                    filters[filter_key] = {}
+@api.route('/datasets/<_id>', methods=['DELETE'])
+def delete_dataset(_id):
+    datasets = load_datasets()
+    if _id in datasets:
+        del datasets[_id]
+        save_datasets(datasets)
+        return jsonify({'message': 'Dataset deleted successfully'}), 200
+    else:
+        return jsonify({'error': 'Dataset not found'}), 404
 
-                filters[filter_key][sub_key] = values
+@api.route('/datasets/<_id>/videos', methods=['GET'])
+def get_videos(_id):
+    datasets = load_datasets()
+    if _id not in datasets or datasets[_id]['status'] != 'created':
+        return jsonify({'error': 'Dataset not found or not yet created'}), 404
+    dataset = datasets[_id]
+    df = load_data(Path(dataset['csv_meta_dir']))  # Example loading dataframe
+    filters = {}
+    for key, values in request.args.items():
+        if key.startswith('filters['):
+            key_parts = key.split('[')
+            filter_key = key_parts[1].rstrip(']')
+            sub_key = key_parts[2].rstrip(']')
+            if filter_key not in filters:
+                filters[filter_key] = {}
+            filters[filter_key][sub_key] = values
+    sort_param = request.args.get('sort', default='', type=str)
+    sort_order = request.args.get('order', default='asc', type=str)
+    page = request.args.get('page', default=1, type=int)
+    page_size = request.args.get('page_size', default=10, type=int)
+    caption_filters = request.args.get('caption_filters', default='', type=str).split(',')
+    filtered_df = df.copy()
+    for filter_key, sub_filters in filters.items():
+        if isinstance(sub_filters, dict):
+            min_val, max_val = sub_filters.get('0'), sub_filters.get('1')
+            if min_val is not None and max_val is not None:
+                min_val = float(min_val)
+                max_val = float(max_val)
+                filtered_df = filtered_df[(filtered_df[filter_key] >= min_val) & (filtered_df[filter_key] <= max_val)]
+        elif isinstance(sub_filters, str):
+            filtered_df = filtered_df[filter_key].str.contains(sub_filters, case=False, na=False)
+    if caption_filters and caption_filters[0] != '':
+        filtered_df = filtered_df[filtered_df['caption_category'].isin(caption_filters)]
+    else:
+        filtered_df = filtered_df[0:0]
+    if sort_param:
+        filtered_df = filtered_df.sort_values(by=sort_param, ascending=(sort_order == 'asc'))
+    total_videos = len(filtered_df)
+    start = (page - 1) * page_size
+    end = start + page_size
+    paginated_df = filtered_df[start:end]
+    paginated_df = paginated_df.where(pd.notnull(paginated_df), None)
+    return jsonify({
+        'total': total_videos,
+        'page': page,
+        'page_size': page_size,
+        'videos': paginated_df.to_dict(orient='records')
+    })
 
-        sort_param = request.args.get('sort', default='', type=str)
-        sort_order = request.args.get('order', default='asc', type=str)
-        page = request.args.get('page', default=1, type=int)
-        page_size = request.args.get('page_size', default=10, type=int)
-        caption_filters = request.args.get('caption_filters', default='', type=str).split(',')
+@api.route('/datasets/<_id>/filters', methods=['GET'])
+def get_filters(_id):
+    datasets = load_datasets()
+    if _id not in datasets or datasets[_id]['status'] != 'created':
+        return jsonify({'error': 'Dataset not found or not yet created'}), 404
+    dataset = datasets[_id]
+    df = load_data(Path(dataset['csv_meta_dir']))  # Example loading dataframe
+    filters = {
+        'num_frames': {'min': df['num_frames'].min(), 'max': df['num_frames'].max()},
+        'aes': {'min': df['aes'].min(), 'max': df['aes'].max()},
+        'aspect_ratio': {'min': df['aspect_ratio'].min(), 'max': df['aspect_ratio'].max()},
+        'fps': {'min': df['fps'].min(), 'max': df['fps'].max()},
+        'height': {'min': df['height'].min(), 'max': df['height'].max()},
+        'resolution': {'min': df['resolution'].min(), 'max': df['resolution'].max()},
+        'width': {'min': df['width'].min(), 'max': df['width'].max()}
+    }
+    return jsonify(filters)
 
-        filtered_df = df.copy()
+@api.route('/datasets/<_id>/thumbnails/<path:filename>')
+def serve_thumbnail(_id, filename):
+    datasets = load_datasets()
+    if _id not in datasets or datasets[_id]['status'] != 'created':
+        return jsonify({'error': 'Dataset not found or not yet created'}), 404
+    return send_from_directory(datasets[_id]['thumbnail_dir'], filename)
 
-        # Apply filters
-        for filter_key, sub_filters in filters.items():
-            if isinstance(sub_filters, dict):
-                min_val, max_val = sub_filters.get('0'), sub_filters.get('1')
-                if min_val is not None and max_val is not None:
-                    min_val = float(min_val)
-                    max_val = float(max_val)
-                    filtered_df = filtered_df[(filtered_df[filter_key] >= min_val) & (filtered_df[filter_key] <= max_val)]
-            elif isinstance(sub_filters, str):
-                filtered_df = filtered_df[filtered_df[filter_key].str.contains(sub_filters, case=False, na=False)]
+@api.route('/datasets/<_id>/videos/<path:filename>')
+def serve_video(_id, filename):
+    datasets = load_datasets()
+    if _id not in datasets or datasets[_id]['status'] != 'created':
+        return jsonify({'error': 'Dataset not found or not yet created'}), 404
+    return send_from_directory(datasets[_id]['video_clip_dir'], filename)
 
-        if caption_filters and caption_filters[0] != '':
-            filtered_df = filtered_df[filtered_df['caption_category'].isin(caption_filters)]
-        else:
-            # set to empty dataframe if no caption filters are selected
-            filtered_df = filtered_df[0:0]
+app.register_blueprint(api, url_prefix='/api')
 
-        if sort_param:
-            filtered_df = filtered_df.sort_values(by=sort_param, ascending=(sort_order == 'asc'))
-
-        # Pagination
-        total_videos = len(filtered_df)
-        start = (page - 1) * page_size
-        end = start + page_size
-        paginated_df = filtered_df[start:end]
-
-        # Replace NaN values with None
-        paginated_df = paginated_df.where(pd.notnull(paginated_df), None)
-
-        return jsonify({
-            'total': total_videos,
-            'page': page,
-            'page_size': page_size,
-            'videos': paginated_df.to_dict(orient='records')
-        })
-
-    @api.route('/filters', methods=['GET'])
-    def get_filters():
-        filters = {
-            'num_frames': {
-                'min': df['num_frames'].min(),
-                'max': df['num_frames'].max()
-            },
-            'aes': {
-                'min': df['aes'].min(),
-                'max': df['aes'].max()
-            },
-            'aspect_ratio': {
-                'min': df['aspect_ratio'].min(),
-                'max': df['aspect_ratio'].max()
-            },
-            'fps': {
-                'min': df['fps'].min(),
-                'max': df['fps'].max()
-            },
-            'height': {
-                'min': df['height'].min(),
-                'max': df['height'].max()
-            },
-            'resolution': {
-                'min': df['resolution'].min(),
-                'max': df['resolution'].max()
-            },
-            'width': {
-                'min': df['width'].min(),
-                'max': df['width'].max()
-            }
-        }
-        return jsonify(filters)
-
-    @api.route('/thumbnails/<path:filename>')
-    def serve_thumbnail(filename):
-        return send_from_directory(thumbnail_dir, filename)
-
-    @api.route('/videos/<path:filename>')
-    def serve_video(filename):
-        # Ensure the filename path is safe and inside the video_clip_dir
-        return send_from_directory(video_clip_dir, filename)
-
-    app.register_blueprint(api)
-    return app
+@app.route('/')
+def serve():
+    return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Run Flask app with path to CSV directory')
-    parser.add_argument('--csv-meta-dir', type=str, required=True, help='Path to the CSV directory')
-    parser.add_argument('--video-clip-dir', type=str, required=True, help='Path to the video clip directory')
-    args = parser.parse_args()
-
-    app = create_app(args.csv_meta_dir, args.video_clip_dir)
     app.run(host='0.0.0.0', debug=True)

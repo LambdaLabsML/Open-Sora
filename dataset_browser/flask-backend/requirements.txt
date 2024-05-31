@@ -4,3 +4,7 @@ gunicorn
 opencv-python
 pandarallel
 pandas
+celery
+redis
+SQLAlchemy
+flask_sqlalchemy

@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import LazyLoad from 'react-lazyload';
 import './VideoList.css';
 
-const VideoList = ({ filters, sort, order }) => {
+const VideoList = ({ datasetId, filters, sort, order }) => {
     const [videos, setVideos] = useState([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -21,7 +21,7 @@ const VideoList = ({ filters, sort, order }) => {
 
         setLoading(true);
 
-        axios.get(`${API_URL}/videos`, {
+        axios.get(`${API_URL}/api/datasets/${datasetId}/videos`, {
             params: {
                 filters,
                 sort,
@@ -47,7 +47,7 @@ const VideoList = ({ filters, sort, order }) => {
 
     useEffect(() => {
         fetchVideos(1);
-    }, [filters, sort, order]);
+    }, [datasetId, filters, sort, order]);
 
     const loadMoreVideos = () => {
         fetchVideos(page + 1);
@@ -70,8 +70,8 @@ const VideoList = ({ filters, sort, order }) => {
                     <p>No videos found</p>
                 ) : (
                     videos.map((video, index) => {
-                        const videoUrl = `${API_URL}/videos/${encodeURIComponent(video.path)}`;
-                        const thumbnailUrl = `${API_URL}/thumbnails/${encodeURIComponent(video.path.replace('.mp4', '.jpg'))}`;
+                        const videoUrl = `${API_URL}/api/datasets/${datasetId}/videos/${encodeURIComponent(video.path)}`;
+                        const thumbnailUrl = `${API_URL}/api/datasets/${datasetId}/thumbnails/${encodeURIComponent(video.path.replace('.mp4', '.jpg'))}`;
                         return (
                             <LazyLoad key={`${video.path}-${index}`} height={200} offset={100} once>
                                 <div className="video-container" onClick={() => handleThumbnailClick(videoUrl)}>
