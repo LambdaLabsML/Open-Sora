@@ -1,38 +1,205 @@
+/* App.css */
+
 .App {
+  display: flex;
+  height: 100vh;
+  background-color: #1E1E1E; /* Background color similar to the screenshot */
+  overflow: hidden; /* Prevent scrollbars on the App container */
+}
+
+.sidebar {
+  width: 300px;
+  padding: 20px;
+  background-color: #2D2D2D; /* Sidebar background color */
+  border-right: 1px solid #444;
+  position: fixed;
+  height: 100%;
+  overflow-y: auto;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+  color: #FFF; /* Text color */
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 320px;
+  padding: 20px;
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  background-color: #1E1E1E; /* Background color */
+  color: #FFF; /* Text color */
+}
+
+h2 {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+  color: #FFF;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
+.sidebar label {
+  display: block;
+  font-weight: bold;
+  margin: 15px 0 5px;
+  color: #DDD; /* Text color */
+}
+
+.sidebar .range-container {
+  margin: 20px 0;
+}
+
+.sidebar .range-values {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+  color: #888;
+  padding: 0 10px;
+}
+
+.sidebar .range-slider {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.sidebar .range-slider input[type="range"] {
+  width: calc(100% - 20px);
+  margin: 0 10px;
+}
+
+.sidebar .checkbox-container {
+  margin: 20px 0;
+}
+
+.sidebar .checkbox-container label {
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+  margin: 5px 0;
+}
+
+.sidebar .checkbox-container input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.sidebar select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background-color: #333; /* Dropdown background color */
+  color: #FFF; /* Text color */
+}
+
+.video-list-container {
+  width: 100%;
+  margin-top: 20px; /* Add margin to the top */
+}
+
+.video-container {
+  margin: 20px 10px; /* Adjust margin to be equal on all sides */
+  padding: 20px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background-color: #2D2D2D; /* Background color */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.video-container:hover {
+  transform: scale(1.02);
+}
+
+.thumbnail-container {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.play-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s;
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.thumbnail-container:hover .play-icon {
+  opacity: 1;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.video-player, img {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  border: 1px solid #555;
+  border-radius: 4px;
+  width: 100%;
+  height: auto;
 }
 
-.App-link {
-  color: #61dafb;
+.video-metadata {
+  text-align: left;
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: #CCC; /* Text color */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.metadata-item {
+  margin-bottom: 5px;
+}
+
+.metadata-item span {
+  font-weight: bold;
+  color: #AAA; /* Label color */
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-family: 'Arial', sans-serif;
+  color: #FFF; /* Text color */
+}
+
+label {
+  display: block;
+  margin: 10px 0;
+  font-weight: bold;
+  font-family: 'Arial', sans-serif;
+  color: #DDD; /* Text color */
+}
+
+input, select {
+  margin-left: 10px;
+  padding: 5px;
+  font-size: 1em;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background-color: #333; /* Input background color */
+  color: #FFF; /* Text color */
+}
+
+input[type="text"] {
+  width: 200px;
+}
+
+p {
+  margin: 5px 0;
+  color: #CCC; /* Text color */
+}
+
+.metadata-item {
+  margin-bottom: 5px;
+}
+
+.metadata-item span {
+  font-weight: bold;
+  color: #AAA; /* Label color */
 }

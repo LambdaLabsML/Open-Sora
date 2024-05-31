@@ -30,7 +30,11 @@ def load_data(csv_meta_dir):
     # Convert paths to be relative to the video_clip_dir
     df['path'] = df['path'].apply(lambda x: Path(x).name)
 
+    # Calculate caption categories
+    df['caption_category'] = df['text'].apply(get_caption_category)
+
     return df
+
 
 def create_thumbnail(video_path, thumbnail_path):
     try:
@@ -71,6 +75,18 @@ def ensure_thumbnails(video_files, thumbnail_dir):
 
     video_files.parallel_apply(lambda video_file: process_video_file(video_file))
 
+def get_caption_category(text):
+    if not text or pd.isna(text):
+        return 'none'
+    if 'Not enough information' in text:
+        return 'not_enough_information'
+    if 'Single image' in text:
+        return 'single_image'
+    if 'No movement' in text:
+        return 'no_movement'
+    return 'accepted'
+
+
 def initialize_app(csv_meta_dir, video_clip_dir):
     thumbnail_dir = video_clip_dir.parent / 'thumbnails'
     thumbnail_dir.mkdir(parents=True, exist_ok=True)
@@ -96,7 +112,7 @@ def create_app(csv_meta_dir, video_clip_dir):
     def serve():
         return send_from_directory(app.static_folder, 'index.html')
 
-    @api.route('/videos', methods=['GET'])
+    @app.route('/videos', methods=['GET'])
     def get_videos():
         # Get filter and sorting parameters
         filter_params = request.args.get('filter', default='', type=str)
@@ -104,12 +120,20 @@ def create_app(csv_meta_dir, video_clip_dir):
         sort_order = request.args.get('order', default='asc', type=str)
         page = request.args.get('page', default=1, type=int)
         page_size = request.args.get('page_size', default=10, type=int)
+        caption_filters = request.args.get('caption_filters', default='', type=str).split(',')
 
         filtered_df = df.copy()
         if filter_params:
             filter_params_dict = dict(param.split(':') for param in filter_params.split(','))
             for key, value in filter_params_dict.items():
                 filtered_df = filtered_df[filtered_df[key].str.contains(value, case=False, na=False)]
+
+        if caption_filters:
+            caption_filters = [f for f in caption_filters if f]  # Remove empty strings
+            if caption_filters:
+                filtered_df = filtered_df[filtered_df['caption_category'].isin(caption_filters)]
+            else:
+                filtered_df = pd.DataFrame(columns=filtered_df.columns)  # Return empty DataFrame if no filters are selected
 
         if sort_param:
             filtered_df = filtered_df.sort_values(by=sort_param, ascending=(sort_order == 'asc'))
@@ -129,6 +153,41 @@ def create_app(csv_meta_dir, video_clip_dir):
             'page_size': page_size,
             'videos': paginated_df.to_dict(orient='records')
         })
+
+
+    @api.route('/filters', methods=['GET'])
+    def get_filters():
+        filters = {
+            'num_frames': {
+                'min': df['num_frames'].min(),
+                'max': df['num_frames'].max()
+            },
+            'aes': {
+                'min': df['aes'].min(),
+                'max': df['aes'].max()
+            },
+            'aspect_ratio': {
+                'min': df['aspect_ratio'].min(),
+                'max': df['aspect_ratio'].max()
+            },
+            'fps': {
+                'min': df['fps'].min(),
+                'max': df['fps'].max()
+            },
+            'height': {
+                'min': df['height'].min(),
+                'max': df['height'].max()
+            },
+            'resolution': {
+                'min': df['resolution'].min(),
+                'max': df['resolution'].max()
+            },
+            'width': {
+                'min': df['width'].min(),
+                'max': df['width'].max()
+            }
+        }
+        return jsonify(filters)
 
     @api.route('/thumbnails/<path:filename>')
     def serve_thumbnail(filename):
