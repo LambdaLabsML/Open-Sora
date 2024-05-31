@@ -112,7 +112,7 @@ def create_app(csv_meta_dir, video_clip_dir):
     def serve():
         return send_from_directory(app.static_folder, 'index.html')
 
-    @app.route('/videos', methods=['GET'])
+    @api.route('/videos', methods=['GET'])
     def get_videos():
         # Get filter and sorting parameters
         filter_params = request.args.get('filter', default='', type=str)
@@ -128,12 +128,8 @@ def create_app(csv_meta_dir, video_clip_dir):
             for key, value in filter_params_dict.items():
                 filtered_df = filtered_df[filtered_df[key].str.contains(value, case=False, na=False)]
 
-        if caption_filters:
-            caption_filters = [f for f in caption_filters if f]  # Remove empty strings
-            if caption_filters:
-                filtered_df = filtered_df[filtered_df['caption_category'].isin(caption_filters)]
-            else:
-                filtered_df = pd.DataFrame(columns=filtered_df.columns)  # Return empty DataFrame if no filters are selected
+        if caption_filters and caption_filters[0] != '':
+            filtered_df = filtered_df[filtered_df['caption_category'].isin(caption_filters)]
 
         if sort_param:
             filtered_df = filtered_df.sort_values(by=sort_param, ascending=(sort_order == 'asc'))
@@ -153,6 +149,8 @@ def create_app(csv_meta_dir, video_clip_dir):
             'page_size': page_size,
             'videos': paginated_df.to_dict(orient='records')
         })
+
+
 
 
     @api.route('/filters', methods=['GET'])

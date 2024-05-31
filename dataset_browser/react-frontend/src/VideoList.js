@@ -8,61 +8,52 @@ const VideoList = ({ filters, sort, order }) => {
     const [videos, setVideos] = useState([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [playingVideo, setPlayingVideo] = useState(null);
 
     const API_URL = process.env.REACT_APP_API_URL;
     const PAGE_SIZE = 10;
 
-    useEffect(() => {
-        fetchVideos(1, true); // Reset when filters change
-    }, [filters, sort, order]);
-
-    const fetchVideos = async (pageNumber = 1, reset = false) => {
+    const fetchVideos = (pageNumber = 1) => {
         const captionFilters = Object.keys(filters.caption)
             .filter(key => filters.caption[key])
             .join(',');
 
-        if (!captionFilters) {
-            setVideos([]);
-            setHasMore(false);
-            return;
-        }
+        setLoading(true);
 
-        try {
-            const response = await axios.get(`${API_URL}/videos`, {
-                params: {
-                    ...filters,
-                    filter: '',
-                    sort,
-                    order,
-                    page: pageNumber,
-                    page_size: PAGE_SIZE,
-                    caption_filters: captionFilters
-                }
+        axios.get(`${API_URL}/videos`, {
+            params: {
+                sort,
+                order,
+                page: pageNumber,
+                page_size: PAGE_SIZE,
+                caption_filters: captionFilters
+            }
+        })
+            .then(response => {
+                const newVideos = response.data.videos;
+                setVideos(prevVideos => pageNumber === 1 ? newVideos : [...prevVideos, ...newVideos]);
+                setHasMore(newVideos.length === PAGE_SIZE);
+                setPage(pageNumber);
+            })
+            .catch(error => {
+                console.error('Error fetching videos:', error);
+            })
+            .finally(() => {
+                setLoading(false);
             });
-
-            const { videos: fetchedVideos } = response.data;
-            console.log('Fetched videos:', fetchedVideos);
-
-            if (reset) {
-                setVideos(fetchedVideos);
-            } else {
-                setVideos(prevVideos => [...prevVideos, ...fetchedVideos]);
-            }
-
-            if (fetchedVideos.length < PAGE_SIZE) {
-                setHasMore(false);
-            } else {
-                setHasMore(true);
-            }
-
-            setPage(pageNumber);
-        } catch (error) {
-            console.error('Error fetching videos:', error);
-        }
     };
+
+    useEffect(() => {
+        fetchVideos(1);
+    }, [filters, sort, order]);
 
     const loadMoreVideos = () => {
         fetchVideos(page + 1);
+    };
+
+    const handleThumbnailClick = (videoUrl) => {
+        setPlayingVideo(videoUrl);
     };
 
     return (
@@ -82,15 +73,27 @@ const VideoList = ({ filters, sort, order }) => {
                         const thumbnailUrl = `${API_URL}/thumbnails/${encodeURIComponent(video.path.replace('.mp4', '.jpg'))}`;
                         return (
                             <LazyLoad key={`${video.path}-${index}`} height={200} offset={100} once>
-                                <div className="video-container">
-                                    <div className="thumbnail-container">
-                                        <img src={thumbnailUrl} alt={video.path} />
-                                        <div className="play-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64">
-                                                <path fill="rgba(255, 255, 255, 0.7)" d="M8 5v14l11-7z"/>
-                                            </svg>
+                                <div className="video-container" onClick={() => handleThumbnailClick(videoUrl)}>
+                                    {playingVideo === videoUrl ? (
+                                        <video width="100%" controls autoPlay className="video-player">
+                                            <source src={videoUrl} type="video/mp4" />
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    ) : (
+                                        <div className="thumbnail-container">
+                                            <img
+                                                src={thumbnailUrl}
+                                                alt={video.path}
+                                                width="100%"
+                                                height="auto"
+                                            />
+                                            <div className="play-icon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64">
+                                                    <path fill="rgba(255, 255, 255, 0.7)" d="M8 5v14l11-7z"/>
+                                                </svg>
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                     <div className="video-metadata">
                                         <p className="metadata-item"><span>Filename:</span> {video.path}</p>
                                         <p className="metadata-item"><span>AES:</span> {video.aes}</p>
