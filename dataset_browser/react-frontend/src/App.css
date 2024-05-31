@@ -2,7 +2,7 @@
 
 .App {
   display: flex;
-  height: 100vh;
+  /*height: 100vh;*/
   background-color: #1E1E1E; /* Background color similar to the screenshot */
   overflow: hidden; /* Prevent scrollbars on the App container */
 }

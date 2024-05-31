@@ -23,6 +23,7 @@ const VideoList = ({ filters, sort, order }) => {
 
         axios.get(`${API_URL}/videos`, {
             params: {
+                filters,
                 sort,
                 order,
                 page: pageNumber,

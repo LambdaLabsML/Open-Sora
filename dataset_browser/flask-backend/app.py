@@ -114,8 +114,20 @@ def create_app(csv_meta_dir, video_clip_dir):
 
     @api.route('/videos', methods=['GET'])
     def get_videos():
-        # Get filter and sorting parameters
-        filter_params = request.args.get('filter', default='', type=str)
+
+        # Parse filters
+        filters = {}
+        for key, values in request.args.items():
+            if key.startswith('filters['):
+                key_parts = key.split('[')
+                filter_key = key_parts[1].rstrip(']')
+                sub_key = key_parts[2].rstrip(']')
+
+                if filter_key not in filters:
+                    filters[filter_key] = {}
+
+                filters[filter_key][sub_key] = values
+
         sort_param = request.args.get('sort', default='', type=str)
         sort_order = request.args.get('order', default='asc', type=str)
         page = request.args.get('page', default=1, type=int)
@@ -123,13 +135,23 @@ def create_app(csv_meta_dir, video_clip_dir):
         caption_filters = request.args.get('caption_filters', default='', type=str).split(',')
 
         filtered_df = df.copy()
-        if filter_params:
-            filter_params_dict = dict(param.split(':') for param in filter_params.split(','))
-            for key, value in filter_params_dict.items():
-                filtered_df = filtered_df[filtered_df[key].str.contains(value, case=False, na=False)]
+
+        # Apply filters
+        for filter_key, sub_filters in filters.items():
+            if isinstance(sub_filters, dict):
+                min_val, max_val = sub_filters.get('0'), sub_filters.get('1')
+                if min_val is not None and max_val is not None:
+                    min_val = float(min_val)
+                    max_val = float(max_val)
+                    filtered_df = filtered_df[(filtered_df[filter_key] >= min_val) & (filtered_df[filter_key] <= max_val)]
+            elif isinstance(sub_filters, str):
+                filtered_df = filtered_df[filtered_df[filter_key].str.contains(sub_filters, case=False, na=False)]
 
         if caption_filters and caption_filters[0] != '':
             filtered_df = filtered_df[filtered_df['caption_category'].isin(caption_filters)]
+        else:
+            # set to empty dataframe if no caption filters are selected
+            filtered_df = filtered_df[0:0]
 
         if sort_param:
             filtered_df = filtered_df.sort_values(by=sort_param, ascending=(sort_order == 'asc'))
@@ -149,9 +171,6 @@ def create_app(csv_meta_dir, video_clip_dir):
             'page_size': page_size,
             'videos': paginated_df.to_dict(orient='records')
         })
-
-
-
 
     @api.route('/filters', methods=['GET'])
     def get_filters():
