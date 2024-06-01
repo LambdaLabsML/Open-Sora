@@ -23,7 +23,7 @@ const VideoList = ({ datasetId, filters, sort, order }) => {
 
         axios.get(`${API_URL}/api/datasets/${datasetId}/videos`, {
             params: {
-                ...filters,
+                filters: JSON.stringify(filters),
                 sort,
                 order,
                 page: pageNumber,
@@ -46,10 +46,8 @@ const VideoList = ({ datasetId, filters, sort, order }) => {
     };
 
     useEffect(() => {
-        if (datasetId) {
-            fetchVideos(1);
-        }
-    }, [datasetId, filters, sort, order]);
+        fetchVideos(1);
+    }, [filters, sort, order]);
 
     const loadMoreVideos = () => {
         fetchVideos(page + 1);
@@ -72,8 +70,8 @@ const VideoList = ({ datasetId, filters, sort, order }) => {
                     <p>No videos found</p>
                 ) : (
                     videos.map((video, index) => {
-                        const videoUrl = `${API_URL}/datasets/${datasetId}/videos/${encodeURIComponent(video.path)}`;
-                        const thumbnailUrl = `${API_URL}/datasets/${datasetId}/thumbnails/${encodeURIComponent(video.path.replace('.mp4', '.jpg'))}`;
+                        const videoUrl = `${API_URL}/api/datasets/${datasetId}/videos/${encodeURIComponent(video.path)}`;
+                        const thumbnailUrl = `${API_URL}/api/datasets/${datasetId}/thumbnails/${encodeURIComponent(video.path.replace('.mp4', '.jpg'))}`;
                         return (
                             <LazyLoad key={`${video.path}-${index}`} height={200} offset={100} once>
                                 <div className="video-container" onClick={() => handleThumbnailClick(videoUrl)}>

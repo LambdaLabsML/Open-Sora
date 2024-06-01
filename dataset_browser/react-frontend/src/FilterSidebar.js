@@ -2,115 +2,122 @@ import React from 'react';
 import { Range, getTrackBackground } from 'react-range';
 
 const FilterSidebar = ({ filterValues, filters, onFilterChange, onCheckboxChange, sort, onSortChange, order, onOrderChange }) => {
+    console.log('FilterSidebar filterValues:', filterValues);
+    console.log('FilterSidebar filters:', filters);
+
+    const renderRangeSlider = (key) => {
+        const values = filters[key];
+        console.log(`Rendering ${key} slider with values:`, values);
+
+        return (
+            <>
+                <Range
+                    step={0.1}
+                    min={filterValues[key].min}
+                    max={filterValues[key].max}
+                    values={values}
+                    onChange={(values) => onFilterChange(key, values)}
+                    allowOverlap={false}
+                    renderTrack={({ props, children }) => (
+                        <div
+                            {...props}
+                            style={{
+                                ...props.style,
+                                height: '6px',
+                                width: '100%',
+                                background: getTrackBackground({
+                                    values: values,
+                                    colors: ['#555', '#BB86FC', '#555'],
+                                    min: filterValues[key].min,
+                                    max: filterValues[key].max,
+                                }),
+                                borderRadius: '4px',
+                                alignSelf: 'center',
+                            }}
+                        >
+                            {children}
+                        </div>
+                    )}
+                    renderThumb={({ props, isDragged }) => (
+                        <div
+                            {...props}
+                            style={{
+                                ...props.style,
+                                height: '20px',
+                                width: '20px',
+                                backgroundColor: '#BB86FC',
+                                border: '1px solid #CCC',
+                                borderRadius: '50%',
+                                boxShadow: '0px 2px 6px #AAA',
+                            }}
+                        />
+                    )}
+                />
+                <div className="range-values">
+                    <span>Min: {values[0].toFixed(1)}</span>
+                    <span>Max: {values[1].toFixed(1)}</span>
+                </div>
+            </>
+        );
+    };
+
     return (
         <div className="sidebar">
             <h2>Filters</h2>
-            {Object.keys(filterValues).map((key) => (
-                <div key={key} className="range-container">
-                    <label>{key.replace('_', ' ').toUpperCase()}</label>
-                    {filterValues[key][0] === filterValues[key][1] ? (
-                        <div className="range-values">
-                            <span>{filterValues[key][0]}</span>
-                        </div>
-                    ) : (
-                        <>
-                            <Range
-                                step={0.1}
-                                min={filterValues[key][0]}
-                                max={filterValues[key][1]}
-                                values={filters[key]}
-                                onChange={(values) => onFilterChange(key, values)}
-                                renderTrack={({ props, children }) => (
-                                    <div
-                                        {...props}
-                                        style={{
-                                            ...props.style,
-                                            height: '6px',
-                                            width: '100%',
-                                            background: getTrackBackground({
-                                                values: filters[key],
-                                                colors: ['#555', '#BB86FC', '#555'],
-                                                min: filterValues[key][0],
-                                                max: filterValues[key][1],
-                                            }),
-                                            borderRadius: '4px',
-                                            alignSelf: 'center',
-                                        }}
-                                    >
-                                        {children}
-                                    </div>
-                                )}
-                                renderThumb={({ props, isDragged }) => (
-                                    <div
-                                        {...props}
-                                        style={{
-                                            ...props.style,
-                                            height: '20px',
-                                            width: '20px',
-                                            backgroundColor: '#BB86FC',
-                                            border: '1px solid #CCC',
-                                            borderRadius: '50%',
-                                            boxShadow: '0px 2px 6px #AAA',
-                                        }}
-                                    />
-                                )}
-                            />
-                            <div className="range-values">
-                                <span>Min: {Math.max(filterValues[key][0], filters[key][0]).toFixed(1)}</span>
-                                <span>Max: {Math.min(filterValues[key][1], filters[key][1]).toFixed(1)}</span>
-                            </div>
-                        </>
-                    )}
-                </div>
-            ))}
-            <div className="checkbox-container">
-                <label>CAPTION</label>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="none"
-                        checked={filters.caption.none}
-                        onChange={onCheckboxChange}
-                    />
-                    None
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="not_enough_information"
-                        checked={filters.caption.not_enough_information}
-                        onChange={onCheckboxChange}
-                    />
-                    Not enough information
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="single_image"
-                        checked={filters.caption.single_image}
-                        onChange={onCheckboxChange}
-                    />
-                    Single image
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="no_movement"
-                        checked={filters.caption.no_movement}
-                        onChange={onCheckboxChange}
-                    />
-                    No movement
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="accepted"
-                        checked={filters.caption.accepted}
-                        onChange={onCheckboxChange}
-                    />
-                    Accepted
-                </label>
+            <div className="range-container">
+                <label>AES</label>
+                {renderRangeSlider('aes')}
             </div>
+            {filters.caption && (
+                <div className="checkbox-container">
+                    <label>CAPTION</label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="none"
+                            checked={filters.caption.none}
+                            onChange={onCheckboxChange}
+                        />
+                        None
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="not_enough_information"
+                            checked={filters.caption.not_enough_information}
+                            onChange={onCheckboxChange}
+                        />
+                        Not enough information
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="single_image"
+                            checked={filters.caption.single_image}
+                            onChange={onCheckboxChange}
+                        />
+                        Single image
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="no_movement"
+                            checked={filters.caption.no_movement}
+                            onChange={onCheckboxChange}
+                        />
+                        No movement
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="accepted"
+                            checked={filters.caption.accepted}
+                            onChange={onCheckboxChange}
+                        />
+                        Accepted
+                    </label>
+                </div>
+            )}
             <label>
                 Sort By:
                 <select value={sort} onChange={onSortChange}>

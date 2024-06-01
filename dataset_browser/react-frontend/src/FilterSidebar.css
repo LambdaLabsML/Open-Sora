@@ -1,0 +1,19 @@
+/* FilterSidebar.css */
+
+.sidebar {
+    padding: 20px;
+    background-color: #2D2D2D;
+    color: #FFF;
+}
+
+.range-container {
+    margin-bottom: 20px;
+}
+
+.range-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    color: #888;
+    padding: 0 10px;
+}
