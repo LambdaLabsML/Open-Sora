@@ -27,6 +27,7 @@ DATASETS_FILE = 'datasets.json'
 
 # Dictionary to hold dataframes in memory
 dataframes = {}
+datasets = {}
 
 def load_datasets():
     if not os.path.exists(DATASETS_FILE):
@@ -134,7 +135,6 @@ def initialize_dataset(name, author, csv_meta_dir, video_clip_dir, description='
         'status': 'created'
     }
 
-    datasets = load_datasets()
     datasets[_id] = dataset
     save_datasets(datasets)
 
@@ -144,7 +144,8 @@ api = Blueprint('api', __name__)
 
 @api.route('/datasets', methods=['GET'])
 def get_datasets():
-    datasets = load_datasets()
+    global datasets
+    datasets = load_datasets()  # Refresh datasets on each call
     return jsonify({'datasets': list(datasets.values())})
 
 @api.route('/datasets', methods=['POST'])
@@ -160,7 +161,6 @@ def create_dataset():
 
 @api.route('/datasets/<_id>', methods=['DELETE'])
 def delete_dataset(_id):
-    datasets = load_datasets()
     if _id in datasets:
         del datasets[_id]
         if _id in dataframes:
@@ -172,7 +172,6 @@ def delete_dataset(_id):
 
 @api.route('/datasets/<_id>/videos', methods=['GET'])
 def get_videos(_id):
-    datasets = load_datasets()
     if _id not in datasets or datasets[_id]['status'] != 'created':
         return jsonify({'error': 'Dataset not found or not yet created'}), 404
     df = dataframes[_id]  # Use the dataframe stored in memory
@@ -221,7 +220,6 @@ def get_videos(_id):
 
 @api.route('/datasets/<_id>/filters', methods=['GET'])
 def get_filters(_id):
-    datasets = load_datasets()
     if _id not in datasets or datasets[_id]['status'] != 'created':
         return jsonify({'error': 'Dataset not found or not yet created'}), 404
     df = dataframes[_id]  # Use the dataframe stored in memory
@@ -238,14 +236,12 @@ def get_filters(_id):
 
 @api.route('/datasets/<_id>/thumbnails/<path:filename>')
 def serve_thumbnail(_id, filename):
-    datasets = load_datasets()
     if _id not in datasets or datasets[_id]['status'] != 'created':
         return jsonify({'error': 'Dataset not found or not yet created'}), 404
     return send_from_directory(datasets[_id]['thumbnail_dir'], filename)
 
 @api.route('/datasets/<_id>/videos/<path:filename>')
 def serve_video(_id, filename):
-    datasets = load_datasets()
     if _id not in datasets or datasets[_id]['status'] != 'created':
         return jsonify({'error': 'Dataset not found or not yet created'}), 404
     return send_from_directory(datasets[_id]['video_clip_dir'], filename)
