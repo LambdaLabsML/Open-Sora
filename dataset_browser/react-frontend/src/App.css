@@ -17,9 +17,11 @@ header {
 
 .main-content {
   display: flex;
+  flex-direction: column;
   flex: 1;
   background-color: #1E1E1E;
   overflow: auto;
+  width: 100%;
 }
 
 h1 {
@@ -29,217 +31,60 @@ h1 {
   color: #FFF;
 }
 
-/* Sidebar Styles */
-.sidebar {
-  width: 300px;
-  padding: 20px;
-  background-color: #2D2D2D;
-  border-right: 1px solid #444;
-  height: 100%;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.5);
-  color: #FFF;
-  flex-shrink: 0;
-}
-
-.sidebar label {
-  display: block;
-  font-weight: bold;
-  margin: 15px 0 5px;
-  color: #DDD;
-}
-
-.sidebar .range-container {
-  margin: 20px 0;
-}
-
-.sidebar .range-values {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9em;
-  color: #888;
-  padding: 0 10px;
-}
-
-.sidebar .range-slider {
-  display: flex;
-  align-items: center;
-  padding: 10px 0;
-}
-
-.sidebar .range-slider input[type="range"] {
-  width: calc(100% - 20px);
-  margin: 0 10px;
-}
-
-.sidebar .checkbox-container {
-  margin: 20px 0;
-}
-
-.sidebar .checkbox-container label {
-  display: flex;
-  align-items: center;
-  font-weight: normal;
-  margin: 5px 0;
-}
-
-.sidebar .checkbox-container input[type="checkbox"] {
-  margin-right: 10px;
-}
-
-.sidebar select {
+/* Dataset List Styles */
+.dataset-list {
   width: 100%;
-  padding: 10px;
-  margin-top: 10px;
+  padding: 20px;
+}
+
+.dataset-list h2 {
+  text-align: center;
   margin-bottom: 20px;
-  border-radius: 4px;
-  border: 1px solid #555;
-  background-color: #333;
+  font-family: 'Arial', sans-serif;
   color: #FFF;
 }
 
-/* Video List Styles */
-.video-list-container {
+.dataset-list table {
   width: 100%;
-  margin-top: 20px;
+  border-collapse: collapse;
 }
 
-.video-container {
-  margin: 20px 10px;
-  padding: 20px;
-  border: 1px solid #444;
-  border-radius: 8px;
-  background-color: #2D2D2D;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.2s;
-}
-
-.video-container:hover {
-  transform: scale(1.02);
-}
-
-.thumbnail-container {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.play-icon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition: opacity 0.3s;
-  pointer-events: none;
-}
-
-.thumbnail-container:hover .play-icon {
-  opacity: 1;
-}
-
-.video-player, img {
-  display: block;
-  margin: 0 auto;
-  max-width: 100%;
-  border: 1px solid #555;
-  border-radius: 4px;
-  width: 100%;
-  height: auto;
-}
-
-.video-metadata {
-  text-align: left;
-  margin-top: 10px;
-  font-size: 0.9em;
-  color: #CCC;
-}
-
-.metadata-item {
-  margin-bottom: 5px;
-}
-
-.metadata-item span {
-  font-weight: bold;
-  color: #AAA;
-}
-
-/* Modal Styles */
-.ReactModal__Overlay {
-  background-color: rgba(0, 0, 0, 0.75) !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ReactModal__Content {
-  width: 60%;
-  max-width: 800px;
-  padding: 20px;
-  background-color: #333;
-  color: #FFF;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-}
-
-.modal-content h2 {
-  margin-top: 0;
-  color: #BB86FC;
-}
-
-.modal-content label {
-  display: block;
-  margin: 10px 0;
-  font-weight: bold;
-  color: #DDD;
-}
-
-.modal-content input[type="text"], .modal-content textarea {
-  width: calc(100% - 20px);
+.dataset-list th, .dataset-list td {
   padding: 10px;
-  margin-left: 10px;
-  border-radius: 4px;
-  border: 1px solid #555;
-  background-color: #444;
-  color: #FFF;
+  border: 1px solid #444;
+  text-align: left;
 }
 
-.modal-content textarea {
-  resize: vertical;
+.dataset-list th {
+  background-color: #333;
+  color: white;
 }
 
-.modal-buttons {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
+.dataset-list td {
+  background-color: #2D2D2D;
+  color: white;
 }
 
-.modal-buttons button {
-  padding: 10px 20px;
-  margin-left: 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.modal-buttons .create-button {
+.dataset-list .actions button {
+  margin-right: 10px;
+  padding: 5px 10px;
   background-color: #BB86FC;
-  color: #FFF;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
 }
 
-.modal-buttons .create-button:hover {
-  background-color: #9b69d4;
+.dataset-list .actions button:last-child {
+  margin-right: 0;
 }
 
-.modal-buttons .close-button {
-  background-color: #444;
-  color: #FFF;
-}
-
-.modal-buttons .close-button:hover {
-  background-color: #555;
+.launch-button {
+  margin: 20px;
+  padding: 10px 20px;
+  background-color: #BB86FC;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
 }

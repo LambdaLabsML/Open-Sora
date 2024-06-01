@@ -1,10 +1,13 @@
-/* DatasetList.css */
-
 .dataset-list {
-    background-color: #2D2D2D;
+    width: 100%;
     padding: 20px;
-    border-radius: 8px;
-    margin-top: 20px;
+}
+
+.dataset-list h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif;
+    color: #FFF;
 }
 
 .dataset-list table {
@@ -14,38 +17,30 @@
 
 .dataset-list th, .dataset-list td {
     padding: 10px;
+    border: 1px solid #444;
     text-align: left;
-    vertical-align: top;
 }
 
 .dataset-list th {
-    background-color: #444;
-    color: #FFF;
+    background-color: #333;
+    color: white;
 }
 
 .dataset-list td {
     background-color: #2D2D2D;
-    color: #FFF;
+    color: white;
 }
 
-.dataset-list tr:nth-child(even) td {
-    background-color: #3D3D3D;
-}
-
-.actions {
-    display: flex;
-    gap: 10px;
-}
-
-.actions button {
-    background-color: #BB86FC;
-    border: none;
+.dataset-list .actions button {
+    margin-right: 10px;
     padding: 5px 10px;
-    border-radius: 4px;
+    background-color: #BB86FC;
+    color: white;
+    border: none;
     cursor: pointer;
-    color: #FFF;
+    border-radius: 4px;
 }
 
-button:hover {
-    background-color: #9B67D3;
+.dataset-list .actions button:last-child {
+    margin-right: 0;
 }
