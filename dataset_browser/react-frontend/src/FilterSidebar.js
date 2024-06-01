@@ -2,13 +2,9 @@ import React from 'react';
 import { Range, getTrackBackground } from 'react-range';
 
 const FilterSidebar = ({ filterValues, filters, onFilterChange, onCheckboxChange, sort, onSortChange, order, onOrderChange }) => {
-    console.log('FilterSidebar filterValues:', filterValues);
-    console.log('FilterSidebar filters:', filters);
 
     const renderRangeSlider = (key) => {
         const values = filters[key];
-        console.log(`Rendering ${key} slider with values:`, values);
-
         return (
             <>
                 <Range
@@ -64,60 +60,66 @@ const FilterSidebar = ({ filterValues, filters, onFilterChange, onCheckboxChange
     return (
         <div className="sidebar">
             <h2>Filters</h2>
-            <div className="range-container">
-                <label>AES</label>
-                {renderRangeSlider('aes')}
-            </div>
-            {filters.caption && (
-                <div className="checkbox-container">
-                    <label>CAPTION</label>
-                    <label>
-                        <input
-                            type="checkbox"
-                            name="none"
-                            checked={filters.caption.none}
-                            onChange={onCheckboxChange}
-                        />
-                        None
-                    </label>
-                    <label>
-                        <input
-                            type="checkbox"
-                            name="not_enough_information"
-                            checked={filters.caption.not_enough_information}
-                            onChange={onCheckboxChange}
-                        />
-                        Not enough information
-                    </label>
-                    <label>
-                        <input
-                            type="checkbox"
-                            name="single_image"
-                            checked={filters.caption.single_image}
-                            onChange={onCheckboxChange}
-                        />
-                        Single image
-                    </label>
-                    <label>
-                        <input
-                            type="checkbox"
-                            name="no_movement"
-                            checked={filters.caption.no_movement}
-                            onChange={onCheckboxChange}
-                        />
-                        No movement
-                    </label>
-                    <label>
-                        <input
-                            type="checkbox"
-                            name="accepted"
-                            checked={filters.caption.accepted}
-                            onChange={onCheckboxChange}
-                        />
-                        Accepted
-                    </label>
+            {Object.keys(filterValues).map((key) => (
+                <div key={key} className="range-container">
+                    <label>{key.replace('_', ' ').toUpperCase()}</label>
+                    {filterValues[key].min === filterValues[key].max ? (
+                        <div className="range-values">
+                            <span>{filterValues[key].min}</span>
+                        </div>
+                    ) : (
+                        renderRangeSlider(key)
+                    )}
                 </div>
-            )}
+            ))}
+            <div className="checkbox-container">
+                <label>CAPTION</label>
+                <label>
+                    <input
+                        type="checkbox"
+                        name="none"
+                        checked={filters.caption.none}
+                        onChange={onCheckboxChange}
+                    />
+                    None
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        name="not_enough_information"
+                        checked={filters.caption.not_enough_information}
+                        onChange={onCheckboxChange}
+                    />
+                    Not enough information
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        name="single_image"
+                        checked={filters.caption.single_image}
+                        onChange={onCheckboxChange}
+                    />
+                    Single image
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        name="no_movement"
+                        checked={filters.caption.no_movement}
+                        onChange={onCheckboxChange}
+                    />
+                    No movement
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        name="accepted"
+                        checked={filters.caption.accepted}
+                        onChange={onCheckboxChange}
+                    />
+                    Accepted
+                </label>
+            </div>
             <label>
                 Sort By:
                 <select value={sort} onChange={onSortChange}>

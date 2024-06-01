@@ -20,7 +20,6 @@ const DatasetViewer = ({ datasetId }) => {
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_API_URL}/api/datasets/${datasetId}/filters`)
             .then(response => {
-                console.log('API response for filter values:', response.data);
                 const filterValuesFromAPI = response.data;
                 const filtersFromAPI = Object.keys(filterValuesFromAPI).reduce((acc, key) => {
                     acc[key] = [filterValuesFromAPI[key].min, filterValuesFromAPI[key].max];
@@ -45,7 +44,6 @@ const DatasetViewer = ({ datasetId }) => {
     }, [datasetId]);
 
     const handleFilterChange = (name, values) => {
-        console.log(`Updating filter ${name} with values:`, values);
         setFilters(prevFilters => ({
             ...prevFilters,
             [name]: values
@@ -69,9 +67,6 @@ const DatasetViewer = ({ datasetId }) => {
     const handleOrderChange = (e) => {
         setOrder(e.target.value);
     };
-
-    console.log('Filter values:', filterValues);
-    console.log('Filters:', filters);
 
     return (
         <div className="dataset-viewer">

@@ -21,16 +21,20 @@ const VideoList = ({ datasetId, filters, sort, order }) => {
 
         setLoading(true);
 
-        axios.get(`${API_URL}/api/datasets/${datasetId}/videos`, {
-            params: {
-                filters: JSON.stringify(filters),
-                sort,
-                order,
-                page: pageNumber,
-                page_size: PAGE_SIZE,
-                caption_filters: captionFilters
+        const params = new URLSearchParams();
+        for (const key in filters) {
+            if (key !== 'caption') {
+                params.append(`filters[${key}][0]`, filters[key][0]);
+                params.append(`filters[${key}][1]`, filters[key][1]);
             }
-        })
+        }
+        params.append('sort', sort);
+        params.append('order', order);
+        params.append('page', pageNumber);
+        params.append('page_size', PAGE_SIZE);
+        params.append('caption_filters', captionFilters);
+
+        axios.get(`${API_URL}/api/datasets/${datasetId}/videos`, { params })
             .then(response => {
                 const newVideos = response.data.videos;
                 setVideos(prevVideos => pageNumber === 1 ? newVideos : [...prevVideos, ...newVideos]);
