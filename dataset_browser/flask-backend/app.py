@@ -189,7 +189,8 @@ def get_videos(_id):
     sort_order = request.args.get('order', default='asc', type=str)
     page = request.args.get('page', default=1, type=int)
     page_size = request.args.get('page_size', default=10, type=int)
-    caption_filters = request.args.get('caption_filters', default='', type=str).split(',')
+    caption_filters = request.args.get('caption_filters', default='accepted', type=str).split(',')
+    logger.debug(f"get_videos(_id={_id}) - filters={filters}, sort_param={sort_param}, sort_order={sort_order}, page={page}, page_size={page_size}, caption_filters={caption_filters}")
     filtered_df = df.copy()
     for filter_key, sub_filters in filters.items():
         if isinstance(sub_filters, dict):

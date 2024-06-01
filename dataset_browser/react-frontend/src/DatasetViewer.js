@@ -3,57 +3,33 @@ import axios from 'axios';
 import FilterSidebar from './FilterSidebar';
 import VideoList from './VideoList';
 
-const DatasetViewer = () => {
-    const [filterValues, setFilterValues] = useState({
-        num_frames: [0, 100],
-        aes: [0, 10],
-        aspect_ratio: [0, 5],
-        fps: [0, 60],
-        height: [0, 1080],
-        resolution: [0, 2160],
-        width: [0, 1920]
-    });
-
-    const [filters, setFilters] = useState({
-        num_frames: [0, 100],
-        aes: [0, 10],
-        aspect_ratio: [0, 5],
-        fps: [0, 60],
-        height: [0, 1080],
-        resolution: [0, 2160],
-        width: [0, 1920],
-        caption: {
-            none: false,
-            not_enough_information: false,
-            single_image: false,
-            no_movement: false,
-            accepted: true
-        }
-    });
-
+const DatasetViewer = ({ datasetId }) => {
+    const [filterValues, setFilterValues] = useState({});
+    const [filters, setFilters] = useState({});
     const [sort, setSort] = useState('aes');
     const [order, setOrder] = useState('desc');
 
     useEffect(() => {
-        axios.get(`${process.env.REACT_APP_API_URL}/filters`)
+        axios.get(`${process.env.REACT_APP_API_URL}/api/datasets/${datasetId}/filters`)
             .then(response => {
-                const newFilterValues = {};
-                for (const key in response.data) {
-                    newFilterValues[key] = [response.data[key].min, response.data[key].max];
-                }
-                setFilterValues(newFilterValues);
-                setFilters(prevFilters => ({
-                    ...prevFilters,
-                    ...newFilterValues
-                }));
+                setFilterValues(response.data);
+                setFilters({
+                    ...response.data,
+                    caption: {
+                        none: false,
+                        not_enough_information: false,
+                        single_image: false,
+                        no_movement: false,
+                        accepted: true
+                    }
+                });
             })
             .catch(error => {
                 console.error('Error fetching filter values:', error);
             });
-    }, []);
+    }, [datasetId]);
 
     const handleFilterChange = (name, values) => {
-        // Ensure values are within the min and max range
         const [minValue, maxValue] = filterValues[name];
         const [newMin, newMax] = values;
         if (newMin < minValue || newMax > maxValue || newMin > newMax) {
@@ -98,7 +74,7 @@ const DatasetViewer = () => {
                 onOrderChange={handleOrderChange}
             />
             <div className="main-content">
-                <VideoList filters={filters} sort={sort} order={order} />
+                <VideoList datasetId={datasetId} filters={filters} sort={sort} order={order} />
             </div>
         </div>
     );

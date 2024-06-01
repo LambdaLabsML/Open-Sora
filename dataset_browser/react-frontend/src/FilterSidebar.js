@@ -29,7 +29,7 @@ const FilterSidebar = ({ filterValues, filters, onFilterChange, onCheckboxChange
                                             width: '100%',
                                             background: getTrackBackground({
                                                 values: filters[key],
-                                                colors: ['#555', '#BB86FC', '#555'], // Updated slider color
+                                                colors: ['#555', '#BB86FC', '#555'],
                                                 min: filterValues[key][0],
                                                 max: filterValues[key][1],
                                             }),
@@ -47,7 +47,7 @@ const FilterSidebar = ({ filterValues, filters, onFilterChange, onCheckboxChange
                                             ...props.style,
                                             height: '20px',
                                             width: '20px',
-                                            backgroundColor: '#BB86FC', // Updated thumb color
+                                            backgroundColor: '#BB86FC',
                                             border: '1px solid #CCC',
                                             borderRadius: '50%',
                                             boxShadow: '0px 2px 6px #AAA',
