@@ -5,7 +5,15 @@ import VideoList from './VideoList';
 
 const DatasetViewer = ({ datasetId }) => {
     const [filterValues, setFilterValues] = useState({});
-    const [filters, setFilters] = useState({});
+    const [filters, setFilters] = useState({
+        caption: {
+            none: false,
+            not_enough_information: false,
+            single_image: false,
+            no_movement: false,
+            accepted: true
+        }
+    });
     const [sort, setSort] = useState('aes');
     const [order, setOrder] = useState('desc');
 
