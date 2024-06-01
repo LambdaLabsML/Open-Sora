@@ -1,5 +1,6 @@
 import React from 'react';
 import { Range, getTrackBackground } from 'react-range';
+import './FilterSidebar.css';
 
 const FilterSidebar = ({ filterValues, filters, onFilterChange, onCheckboxChange, sort, onSortChange, order, onOrderChange }) => {
 
@@ -74,51 +75,55 @@ const FilterSidebar = ({ filterValues, filters, onFilterChange, onCheckboxChange
             ))}
             <div className="checkbox-container">
                 <label>CAPTION</label>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="none"
-                        checked={filters.caption.none}
-                        onChange={onCheckboxChange}
-                    />
-                    None
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="not_enough_information"
-                        checked={filters.caption.not_enough_information}
-                        onChange={onCheckboxChange}
-                    />
-                    Not enough information
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="single_image"
-                        checked={filters.caption.single_image}
-                        onChange={onCheckboxChange}
-                    />
-                    Single image
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="no_movement"
-                        checked={filters.caption.no_movement}
-                        onChange={onCheckboxChange}
-                    />
-                    No movement
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="accepted"
-                        checked={filters.caption.accepted}
-                        onChange={onCheckboxChange}
-                    />
-                    Accepted
-                </label>
+                {filters.caption && (
+                    <>
+                        <label>
+                            <input
+                                type="checkbox"
+                                name="none"
+                                checked={filters.caption.none}
+                                onChange={onCheckboxChange}
+                            />
+                            None
+                        </label>
+                        <label>
+                            <input
+                                type="checkbox"
+                                name="not_enough_information"
+                                checked={filters.caption.not_enough_information}
+                                onChange={onCheckboxChange}
+                            />
+                            Not enough information
+                        </label>
+                        <label>
+                            <input
+                                type="checkbox"
+                                name="single_image"
+                                checked={filters.caption.single_image}
+                                onChange={onCheckboxChange}
+                            />
+                            Single image
+                        </label>
+                        <label>
+                            <input
+                                type="checkbox"
+                                name="no_movement"
+                                checked={filters.caption.no_movement}
+                                onChange={onCheckboxChange}
+                            />
+                            No movement
+                        </label>
+                        <label>
+                            <input
+                                type="checkbox"
+                                name="accepted"
+                                checked={filters.caption.accepted}
+                                onChange={onCheckboxChange}
+                            />
+                            Accepted
+                        </label>
+                    </>
+                )}
             </div>
             <label>
                 Sort By:

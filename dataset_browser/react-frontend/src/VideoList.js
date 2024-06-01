@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import LazyLoad from 'react-lazyload';
 import './VideoList.css';
 
-const VideoList = ({ datasetId, filters, sort, order }) => {
+const VideoList = ({ datasetId, filters = {}, sort, order }) => {
     const [videos, setVideos] = useState([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -14,16 +14,33 @@ const VideoList = ({ datasetId, filters, sort, order }) => {
     const API_URL = process.env.REACT_APP_API_URL;
     const PAGE_SIZE = 10;
 
+    const serializeFilters = (filters) => {
+        const params = new URLSearchParams();
+        Object.keys(filters).forEach(key => {
+            if (typeof filters[key] === 'object' && !Array.isArray(filters[key])) {
+                Object.keys(filters[key]).forEach(subKey => {
+                    params.append(`filters[${key}][${subKey}]`, filters[key][subKey]);
+                });
+            } else {
+                filters[key].forEach((value, index) => {
+                    params.append(`filters[${key}][${index}]`, value);
+                });
+            }
+        });
+        return params.toString();
+    };
+
     const fetchVideos = (pageNumber = 1) => {
-        const captionFilters = Object.keys(filters.caption)
+        const captionFilters = Object.keys(filters.caption || {})
             .filter(key => filters.caption[key])
             .join(',');
 
         setLoading(true);
 
-        axios.get(`${API_URL}/api/datasets/${datasetId}/videos`, {
+        const serializedFilters = serializeFilters(filters);
+
+        axios.get(`${API_URL}/api/datasets/${datasetId}/videos?${serializedFilters}`, {
             params: {
-                filters,
                 sort,
                 order,
                 page: pageNumber,
