@@ -25,6 +25,9 @@ CORS(app)
 
 DATASETS_FILE = 'datasets.json'
 
+# Dictionary to hold dataframes in memory
+dataframes = {}
+
 def load_datasets():
     if not os.path.exists(DATASETS_FILE):
         logger.debug("load_datasets - datasets.json file not found")
@@ -32,6 +35,10 @@ def load_datasets():
     with open(DATASETS_FILE, 'r') as f:
         datasets = json.load(f)
         logger.debug(f"load_datasets - {len(datasets)} records loaded from'{Path(DATASETS_FILE).absolute()}'")
+        # Load dataframes into memory
+        for dataset in datasets.values():
+            csv_meta_dir = dataset['csv_meta_dir']
+            dataframes[dataset['id']] = load_data(csv_meta_dir)
         return datasets
 
 def save_datasets(datasets):
@@ -63,6 +70,9 @@ def load_data(csv_meta_dir):
     return df
 
 def create_thumbnail(video_path, thumbnail_path):
+    if os.path.exists(thumbnail_path):
+        return
+
     try:
         cap = cv2.VideoCapture(str(video_path))
         if not cap.isOpened():
@@ -101,17 +111,19 @@ def get_caption_category(text):
 
 def initialize_dataset(name, author, csv_meta_dir, video_clip_dir, description=''):
     logger.debug(f"initialize_dataset(name={name}, author={author}, csv_meta_dir={csv_meta_dir}, video_clip_dir={video_clip_dir}, description={description})")
-    dataset_id = str(uuid.uuid4())
+    _id = str(uuid.uuid4())[:8]
     thumbnail_dir = Path(video_clip_dir).parent / f'thumbnails_{name}'
     thumbnail_dir.mkdir(parents=True, exist_ok=True)
 
     initialize_pandarallel()
     df = load_data(Path(csv_meta_dir))
+    dataframes[_id] = df  # Store dataframe in memory
+
     video_files = pd.Series(list(Path(video_clip_dir).glob('*.mp4')))
     ensure_thumbnails(video_files, thumbnail_dir)
 
     dataset = {
-        'id': str(dataset_id),
+        'id': _id,
         'name': name,
         'author': author,
         'csv_meta_dir': csv_meta_dir,
@@ -123,7 +135,7 @@ def initialize_dataset(name, author, csv_meta_dir, video_clip_dir, description='
     }
 
     datasets = load_datasets()
-    datasets[str(dataset_id)] = dataset
+    datasets[_id] = dataset
     save_datasets(datasets)
 
     return dataset
@@ -133,7 +145,7 @@ api = Blueprint('api', __name__)
 @api.route('/datasets', methods=['GET'])
 def get_datasets():
     datasets = load_datasets()
-    return jsonify(list(datasets.values()))
+    return jsonify({'datasets': list(datasets.values())})
 
 @api.route('/datasets', methods=['POST'])
 def create_dataset():
@@ -144,13 +156,15 @@ def create_dataset():
     video_clip_dir = data['video_clip_dir']
     description = data.get('description', '')
     dataset = initialize_dataset(name, author, csv_meta_dir, video_clip_dir, description)
-    return jsonify({'message': 'Dataset creation started', 'dataset': dataset}), 202
+    return jsonify({'message': 'Dataset created', 'dataset': dataset})
 
 @api.route('/datasets/<_id>', methods=['DELETE'])
 def delete_dataset(_id):
     datasets = load_datasets()
     if _id in datasets:
         del datasets[_id]
+        if _id in dataframes:
+            del dataframes[_id]
         save_datasets(datasets)
         return jsonify({'message': 'Dataset deleted successfully'}), 200
     else:
@@ -161,8 +175,7 @@ def get_videos(_id):
     datasets = load_datasets()
     if _id not in datasets or datasets[_id]['status'] != 'created':
         return jsonify({'error': 'Dataset not found or not yet created'}), 404
-    dataset = datasets[_id]
-    df = load_data(Path(dataset['csv_meta_dir']))  # Example loading dataframe
+    df = dataframes[_id]  # Use the dataframe stored in memory
     filters = {}
     for key, values in request.args.items():
         if key.startswith('filters['):
@@ -210,8 +223,7 @@ def get_filters(_id):
     datasets = load_datasets()
     if _id not in datasets or datasets[_id]['status'] != 'created':
         return jsonify({'error': 'Dataset not found or not yet created'}), 404
-    dataset = datasets[_id]
-    df = load_data(Path(dataset['csv_meta_dir']))  # Example loading dataframe
+    df = dataframes[_id]  # Use the dataframe stored in memory
     filters = {
         'num_frames': {'min': df['num_frames'].min(), 'max': df['num_frames'].max()},
         'aes': {'min': df['aes'].min(), 'max': df['aes'].max()},
@@ -244,4 +256,5 @@ def serve():
     return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
+    datasets = load_datasets()  # Load datasets and dataframes when starting the app
     app.run(host='0.0.0.0', debug=True)
