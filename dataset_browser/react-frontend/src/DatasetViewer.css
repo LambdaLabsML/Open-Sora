@@ -1,0 +1,25 @@
+/* DatasetViewer.css */
+
+.dataset-viewer {
+    display: flex;
+}
+
+.sidebar {
+    width: 300px;
+    padding: 20px;
+    background-color: #2D2D2D; /* Sidebar background color */
+    border-right: 1px solid #444;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+    color: #FFF; /* Text color */
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    background-color: #1E1E1E; /* Background color */
+    color: #FFF; /* Text color */
+}

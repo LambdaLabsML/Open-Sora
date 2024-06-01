@@ -252,6 +252,10 @@ app.register_blueprint(api, url_prefix='/api')
 def serve():
     return send_from_directory(app.static_folder, 'index.html')
 
+@app.errorhandler(404)
+def not_found(e):
+    return send_from_directory(app.static_folder, 'index.html')
+
 if __name__ == '__main__':
     datasets = load_datasets()  # Load datasets and dataframes when starting the app
     app.run(host='0.0.0.0', debug=True)

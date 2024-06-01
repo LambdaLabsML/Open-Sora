@@ -1,14 +1,45 @@
-import React from 'react';
-import './App.css';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import DatasetList from './DatasetList';
+import CreateDatasetModal from './CreateDatasetModal';
 import DatasetViewer from './DatasetViewer';
+import './App.css';
 
-function App() {
-    const datasetId = "e4a3e2f6"; // Replace with your actual dataset ID or fetch it as needed
+const App = () => {
+    const [refresh, setRefresh] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleCreate = () => {
+        setRefresh(!refresh);
+    };
+
+    const handleDelete = () => {
+        setRefresh(!refresh);
+    };
+
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
 
     return (
-        <div className="App">
-            <DatasetViewer datasetId={datasetId} />
-        </div>
+        <Router>
+            <div className="App">
+                <header>
+                    <h1>Dataset Browser</h1>
+                </header>
+                <div className="main-content">
+                    <Routes>
+                        <Route path="/" element={
+                            <div>
+                                <button className="launch-button" onClick={openModal}>Create New Dataset</button>
+                                <DatasetList onDelete={handleDelete} key={refresh}/>
+                                <CreateDatasetModal isOpen={isModalOpen} onClose={closeModal} onCreate={handleCreate}/>
+                            </div>
+                        }/>
+                        <Route path="/dataset/:id" element={<DatasetViewer/>}/>
+                    </Routes>
+                </div>
+            </div>
+        </Router>
     );
 }
 

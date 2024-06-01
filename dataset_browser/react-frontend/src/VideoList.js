@@ -21,20 +21,16 @@ const VideoList = ({ datasetId, filters, sort, order }) => {
 
         setLoading(true);
 
-        const params = new URLSearchParams();
-        for (const key in filters) {
-            if (key !== 'caption') {
-                params.append(`filters[${key}][0]`, filters[key][0]);
-                params.append(`filters[${key}][1]`, filters[key][1]);
+        axios.get(`${API_URL}/api/datasets/${datasetId}/videos`, {
+            params: {
+                filters,
+                sort,
+                order,
+                page: pageNumber,
+                page_size: PAGE_SIZE,
+                caption_filters: captionFilters
             }
-        }
-        params.append('sort', sort);
-        params.append('order', order);
-        params.append('page', pageNumber);
-        params.append('page_size', PAGE_SIZE);
-        params.append('caption_filters', captionFilters);
-
-        axios.get(`${API_URL}/api/datasets/${datasetId}/videos`, { params })
+        })
             .then(response => {
                 const newVideos = response.data.videos;
                 setVideos(prevVideos => pageNumber === 1 ? newVideos : [...prevVideos, ...newVideos]);
@@ -51,7 +47,7 @@ const VideoList = ({ datasetId, filters, sort, order }) => {
 
     useEffect(() => {
         fetchVideos(1);
-    }, [filters, sort, order]);
+    }, [datasetId, filters, sort, order]);
 
     const loadMoreVideos = () => {
         fetchVideos(page + 1);

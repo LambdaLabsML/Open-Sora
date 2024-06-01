@@ -1,0 +1,89 @@
+/* CreateDatasetModal.css */
+
+.Modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    background-color: #333;
+    padding: 20px;
+    border-radius: 8px;
+    width: 50%; /* Adjust the width as needed */
+    max-width: 800px;
+    color: #FFF;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.Overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+.Modal h2 {
+    margin-top: 0;
+    color: #BB86FC; /* Header color */
+}
+
+.Modal form {
+    display: flex;
+    flex-direction: column;
+}
+
+.Modal label {
+    margin: 10px 0 5px;
+    color: #DDD; /* Label color */
+}
+
+.Modal input[type="text"], .Modal textarea {
+    width: calc(100% - 20px); /* Adjust width to prevent overflow */
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px solid #555;
+    background-color: #444; /* Input background color */
+    color: #FFF; /* Text color */
+    font-size: 1em;
+}
+
+.Modal textarea {
+    height: 100px;
+    resize: none;
+}
+
+.Modal button {
+    padding: 10px 15px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #BB86FC; /* Button background color */
+    color: #FFF; /* Button text color */
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+
+.Modal button:hover {
+    background-color: #9A67EA; /* Hover color */
+}
+
+.Modal .close-button {
+    background-color: #444; /* Close button background color */
+    margin-left: 10px;
+}
+
+.Modal .close-button:hover {
+    background-color: #333; /* Close button hover color */
+}
+
+.Modal .button-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}

@@ -1,46 +1,51 @@
-/* App.css */
-
+/* General App Styles */
 .App {
   display: flex;
-  /*height: 100vh;*/
-  background-color: #1E1E1E; /* Background color similar to the screenshot */
-  overflow: hidden; /* Prevent scrollbars on the App container */
+  flex-direction: column;
+  height: 100vh;
+  background-color: #1E1E1E;
 }
 
-.sidebar {
-  width: 300px;
-  padding: 20px;
-  background-color: #2D2D2D; /* Sidebar background color */
-  border-right: 1px solid #444;
-  position: fixed;
-  height: 100%;
-  overflow-y: auto;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.5);
-  color: #FFF; /* Text color */
+header {
+  background-color: #333;
+  padding: 10px;
+  text-align: center;
+  color: white;
+  font-size: 1.5em;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .main-content {
+  display: flex;
   flex: 1;
-  margin-left: 320px;
-  padding: 20px;
-  overflow-y: auto; /* Enable vertical scrolling */
-  overflow-x: hidden; /* Prevent horizontal scrolling */
-  background-color: #1E1E1E; /* Background color */
-  color: #FFF; /* Text color */
+  background-color: #1E1E1E;
+  overflow: auto;
 }
 
-h2 {
-  font-size: 1.5em;
-  margin-bottom: 20px;
-  color: #FFF;
+h1 {
   text-align: center;
+  margin-bottom: 20px;
+  font-family: 'Arial', sans-serif;
+  color: #FFF;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 300px;
+  padding: 20px;
+  background-color: #2D2D2D;
+  border-right: 1px solid #444;
+  height: 100%;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+  color: #FFF;
+  flex-shrink: 0;
 }
 
 .sidebar label {
   display: block;
   font-weight: bold;
   margin: 15px 0 5px;
-  color: #DDD; /* Text color */
+  color: #DDD;
 }
 
 .sidebar .range-container {
@@ -88,21 +93,22 @@ h2 {
   margin-bottom: 20px;
   border-radius: 4px;
   border: 1px solid #555;
-  background-color: #333; /* Dropdown background color */
-  color: #FFF; /* Text color */
+  background-color: #333;
+  color: #FFF;
 }
 
+/* Video List Styles */
 .video-list-container {
   width: 100%;
-  margin-top: 20px; /* Add margin to the top */
+  margin-top: 20px;
 }
 
 .video-container {
-  margin: 20px 10px; /* Adjust margin to be equal on all sides */
+  margin: 20px 10px;
   padding: 20px;
   border: 1px solid #444;
   border-radius: 8px;
-  background-color: #2D2D2D; /* Background color */
+  background-color: #2D2D2D;
   box-shadow: 0 2px 4px rgba(0,0,0,0.5);
   cursor: pointer;
   position: relative;
@@ -149,7 +155,7 @@ h2 {
   text-align: left;
   margin-top: 10px;
   font-size: 0.9em;
-  color: #CCC; /* Text color */
+  color: #CCC;
 }
 
 .metadata-item {
@@ -158,48 +164,82 @@ h2 {
 
 .metadata-item span {
   font-weight: bold;
-  color: #AAA; /* Label color */
+  color: #AAA;
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-  font-family: 'Arial', sans-serif;
-  color: #FFF; /* Text color */
+/* Modal Styles */
+.ReactModal__Overlay {
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-label {
+.ReactModal__Content {
+  width: 60%;
+  max-width: 800px;
+  padding: 20px;
+  background-color: #333;
+  color: #FFF;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: #BB86FC;
+}
+
+.modal-content label {
   display: block;
   margin: 10px 0;
   font-weight: bold;
-  font-family: 'Arial', sans-serif;
-  color: #DDD; /* Text color */
+  color: #DDD;
 }
 
-input, select {
+.modal-content input[type="text"], .modal-content textarea {
+  width: calc(100% - 20px);
+  padding: 10px;
   margin-left: 10px;
-  padding: 5px;
-  font-size: 1em;
-  border: 1px solid #555;
   border-radius: 4px;
-  background-color: #333; /* Input background color */
-  color: #FFF; /* Text color */
+  border: 1px solid #555;
+  background-color: #444;
+  color: #FFF;
 }
 
-input[type="text"] {
-  width: 200px;
+.modal-content textarea {
+  resize: vertical;
 }
 
-p {
-  margin: 5px 0;
-  color: #CCC; /* Text color */
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
 }
 
-.metadata-item {
-  margin-bottom: 5px;
+.modal-buttons button {
+  padding: 10px 20px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.metadata-item span {
-  font-weight: bold;
-  color: #AAA; /* Label color */
+.modal-buttons .create-button {
+  background-color: #BB86FC;
+  color: #FFF;
+}
+
+.modal-buttons .create-button:hover {
+  background-color: #9b69d4;
+}
+
+.modal-buttons .close-button {
+  background-color: #444;
+  color: #FFF;
+}
+
+.modal-buttons .close-button:hover {
+  background-color: #555;
 }

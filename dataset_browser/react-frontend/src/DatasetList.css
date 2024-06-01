@@ -1,0 +1,51 @@
+/* DatasetList.css */
+
+.dataset-list {
+    background-color: #2D2D2D;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.dataset-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dataset-list th, .dataset-list td {
+    padding: 10px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.dataset-list th {
+    background-color: #444;
+    color: #FFF;
+}
+
+.dataset-list td {
+    background-color: #2D2D2D;
+    color: #FFF;
+}
+
+.dataset-list tr:nth-child(even) td {
+    background-color: #3D3D3D;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.actions button {
+    background-color: #BB86FC;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #FFF;
+}
+
+button:hover {
+    background-color: #9B67D3;
+}
