@@ -66,16 +66,17 @@ def load_data(csv_meta_dir):
         else:
             df = pd.merge(df, df2, on='path', how='outer', suffixes=('', '_duplicate'))
 
+            # Combine the source columns
+            if 'source_duplicate' in df.columns:
+                df['source'] = df[['source', 'source_duplicate']].apply(lambda x: ', '.join(filter(pd.notna, x)), axis=1)
+                df.drop(columns=['source_duplicate'], inplace=True)
+
             # Combine non-NA values from duplicate columns
             for column in df.columns:
                 if column.endswith('_duplicate'):
                     original_column = column.replace('_duplicate', '')
                     df[original_column] = df[original_column].combine_first(df[column])
                     df.drop(columns=[column], inplace=True)
-
-            # Combine the source columns
-            df['source'] = df[['source', 'source_duplicate']].apply(lambda x: ', '.join(filter(pd.notna, x)), axis=1)
-            df.drop(columns=['source_duplicate'], inplace=True)
 
     if 'num_frames' in df.columns:
         df.dropna(subset=['num_frames'], inplace=True)
