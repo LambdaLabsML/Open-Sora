@@ -53,19 +53,33 @@ def initialize_pandarallel():
 def load_data(csv_meta_dir):
     logger.debug(f"load_data(csv_meta_dir={csv_meta_dir})")
     df = pd.DataFrame()
+
     for csv_file in Path(csv_meta_dir).glob('*.csv'):
         if csv_file.name in ['meta_info_fmin1_timestamp.csv', 'meta_info_fmin1.csv']:
             continue
         df2 = pd.read_csv(csv_file)
         df2.rename(columns={'video': 'path'}, inplace=True)
+        df2['source'] = csv_file.stem
+
         if df.empty:
             df = df2
         else:
             df = pd.merge(df, df2, on='path', how='outer', suffixes=('', '_duplicate'))
+
+            # Combine non-NA values from duplicate columns
             for column in df.columns:
                 if column.endswith('_duplicate'):
+                    original_column = column.replace('_duplicate', '')
+                    df[original_column] = df[original_column].combine_first(df[column])
                     df.drop(columns=[column], inplace=True)
-    df.dropna(subset=['num_frames'], inplace=True)
+
+            # Combine the source columns
+            df['source'] = df[['source', 'source_duplicate']].apply(lambda x: ', '.join(filter(pd.notna, x)), axis=1)
+            df.drop(columns=['source_duplicate'], inplace=True)
+
+    if 'num_frames' in df.columns:
+        df.dropna(subset=['num_frames'], inplace=True)
+
     df['path'] = df['path'].apply(lambda x: Path(x).name)
     df['caption_category'] = df['text'].apply(get_caption_category)
     return df
