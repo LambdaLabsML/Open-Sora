@@ -83,6 +83,10 @@ def load_data(csv_meta_dir):
 
     df['path'] = df['path'].apply(lambda x: Path(x).name)
     df['caption_category'] = df['text'].apply(get_caption_category)
+
+    if 'aes' not in df.columns:
+        df['aes'] = None
+
     return df
 
 def create_thumbnail(video_path, thumbnail_path):
