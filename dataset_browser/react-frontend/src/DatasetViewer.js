@@ -80,7 +80,7 @@ const DatasetViewer = () => {
                 textFilter={textFilter}
                 onTextFilterChange={handleTextFilterChange}
             />
-            <div className="main-content">
+            <div className="video-list-content">
                 <VideoList datasetId={id} filters={filters} sort={sort} order={order} textFilter={textFilter} />
             </div>
         </div>

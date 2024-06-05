@@ -26,7 +26,7 @@ const App = () => {
                 <header>
                     <h1>Dataset Browser</h1>
                 </header>
-                <div className="main-content">
+                <div className="app-content">
                     <Routes>
                         <Route path="/" element={
                             <div className="dataset-list-page">

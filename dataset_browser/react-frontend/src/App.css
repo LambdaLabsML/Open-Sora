@@ -1,10 +1,10 @@
 /* General App Styles */
 .App {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+  /*display: flex;*/
+  /*flex-direction: column;*/
+  /*height: 100vh;*/
   background-color: #1E1E1E;
-  overflow-x: hidden; /* Prevent horizontal scrolling */
+  /*overflow-x: hidden; !* Prevent horizontal scrolling *!*/
 }
 
 header {
@@ -17,10 +17,10 @@ header {
   z-index: 1000;
   position: sticky;
   top: 0;
-  width: 100%;
+  overflow: hidden;
 }
 
-.main-content {
+.app-content {
   display: flex;
   flex-direction: column;
   flex: 1;

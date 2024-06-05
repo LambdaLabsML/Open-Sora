@@ -19,7 +19,7 @@
     color: #FFF; /* Text color */
 }
 
-.main-content {
+.video-list-content {
     margin-left: 320px; /* Adjust based on sidebar width and padding */
     flex: 1;
     padding: 20px;
