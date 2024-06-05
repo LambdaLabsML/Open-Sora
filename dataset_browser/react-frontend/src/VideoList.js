@@ -35,6 +35,7 @@ const VideoList = ({ datasetId, filters = {}, sort, order, textFilter }) => {
         return params.toString();
     };
 
+
     const fetchVideos = async (pageNumber = 1) => {
         const captionFilters = Object.keys(filters.caption || {})
             .filter(key => filters.caption[key])
@@ -52,7 +53,8 @@ const VideoList = ({ datasetId, filters = {}, sort, order, textFilter }) => {
                     page: pageNumber,
                     page_size: PAGE_SIZE,
                     caption_filters: captionFilters,
-                    text_filter: textFilter
+                    text_filter: textFilter,
+                    ...Object.fromEntries(new URLSearchParams(serializedFilters))  // Include serialized filters
                 }
             });
             const newVideos = response.data.videos;
@@ -65,6 +67,7 @@ const VideoList = ({ datasetId, filters = {}, sort, order, textFilter }) => {
             setLoading(false);
         }
     };
+
 
     useEffect(() => {
         if (
