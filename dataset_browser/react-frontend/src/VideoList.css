@@ -2,20 +2,22 @@
 
 .video-list-container {
     width: 100%;
-    padding: 20px; /* Ensure padding is consistent */
+    padding: 10px;
+    box-sizing: border-box; /* Include padding and border in width */
 }
 
 .video-container {
-    margin: 20px 10px; /* Adjust margin: 20px top/bottom, 10px left/right */
-    padding: 20px;
+    margin: 10px 0; /* Adjust margin */
+    padding: 10px;
     border: 1px solid #444;
     border-radius: 8px;
     background-color: #2D2D2D; /* Background color */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     cursor: pointer;
     position: relative;
     overflow: hidden;
     transition: transform 0.2s;
+    word-wrap: break-word; /* Allow text to wrap within container */
 }
 
 .video-container:hover {

@@ -4,6 +4,7 @@
   flex-direction: column;
   height: 100vh;
   background-color: #1E1E1E;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 header {
@@ -12,7 +13,11 @@ header {
   text-align: center;
   color: white;
   font-size: 1.5em;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  position: sticky;
+  top: 0;
+  width: 100%;
 }
 
 .main-content {
@@ -20,8 +25,8 @@ header {
   flex-direction: column;
   flex: 1;
   background-color: #1E1E1E;
-  overflow: auto;
-  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 h1 {
@@ -31,52 +36,12 @@ h1 {
   color: #FFF;
 }
 
-/* Dataset List Styles */
-.dataset-list {
+/* Dataset List Page Styles */
+.dataset-list-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
-  padding: 20px;
-}
-
-.dataset-list h2 {
-  text-align: center;
-  margin-bottom: 20px;
-  font-family: 'Arial', sans-serif;
-  color: #FFF;
-}
-
-.dataset-list table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.dataset-list th, .dataset-list td {
-  padding: 10px;
-  border: 1px solid #444;
-  text-align: left;
-}
-
-.dataset-list th {
-  background-color: #333;
-  color: white;
-}
-
-.dataset-list td {
-  background-color: #2D2D2D;
-  color: white;
-}
-
-.dataset-list .actions button {
-  margin-right: 10px;
-  padding: 5px 10px;
-  background-color: #BB86FC;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.dataset-list .actions button:last-child {
-  margin-right: 0;
 }
 
 .launch-button {

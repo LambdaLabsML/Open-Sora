@@ -29,7 +29,7 @@ const App = () => {
                 <div className="main-content">
                     <Routes>
                         <Route path="/" element={
-                            <div>
+                            <div className="dataset-list-page">
                                 <button className="launch-button" onClick={openModal}>Create New Dataset</button>
                                 <DatasetList onDelete={handleDelete} key={refresh}/>
                                 <CreateDatasetModal isOpen={isModalOpen} onClose={closeModal} onCreate={handleCreate}/>

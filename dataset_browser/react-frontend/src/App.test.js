@@ -1,8 +1,22 @@
+// src/App.test.js
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+let container = null;
+beforeEach(() => {
+  // setup a DOM element as a render target
+  container = document.createElement("div");
+  container.id = 'root';
+  document.body.appendChild(container);
+});
+
+afterEach(() => {
+  // cleanup on exiting
+  document.body.removeChild(container);
+  container = null;
+});
+
+test('renders without crashing', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
 });

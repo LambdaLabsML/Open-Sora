@@ -2,20 +2,25 @@
 
 .dataset-viewer {
     display: flex;
+    width: 100%;
 }
 
 .sidebar {
+    position: fixed;
+    top: 60px; /* Adjust based on header height */
+    left: 0;
     width: 300px;
     padding: 20px;
     background-color: #2D2D2D; /* Sidebar background color */
     border-right: 1px solid #444;
-    height: 100vh;
+    height: calc(100vh - 60px); /* Adjust based on header height */
     overflow-y: auto;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
     color: #FFF; /* Text color */
 }
 
 .main-content {
+    margin-left: 320px; /* Adjust based on sidebar width and padding */
     flex: 1;
     padding: 20px;
     overflow-y: auto; /* Enable vertical scrolling */

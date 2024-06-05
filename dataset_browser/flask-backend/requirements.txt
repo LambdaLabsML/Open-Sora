@@ -8,3 +8,4 @@ celery
 redis
 SQLAlchemy
 flask_sqlalchemy
+pytest

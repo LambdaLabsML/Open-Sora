@@ -6,7 +6,7 @@ import VideoList from './VideoList';
 import './DatasetViewer.css';
 
 const DatasetViewer = () => {
-    const { id } = useParams(); // Use the useParams hook to get the id from the route
+    const { id } = useParams();
     const [filterValues, setFilterValues] = useState({});
     const [filters, setFilters] = useState({});
     const [sort, setSort] = useState('aes');
@@ -88,4 +88,3 @@ const DatasetViewer = () => {
 };
 
 export default DatasetViewer;
-

@@ -1,6 +1,9 @@
+/* Dataset List Styles */
 .dataset-list {
     width: 100%;
+    max-width: 1200px; /* Limit the maximum width */
     padding: 20px;
+    box-sizing: border-box; /* Include padding and border in width */
 }
 
 .dataset-list h2 {
@@ -13,12 +16,14 @@
 .dataset-list table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed; /* Prevent table from expanding beyond parent */
 }
 
 .dataset-list th, .dataset-list td {
     padding: 10px;
     border: 1px solid #444;
     text-align: left;
+    word-wrap: break-word; /* Allow text to wrap within cells */
 }
 
 .dataset-list th {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import LazyLoad from 'react-lazyload';
@@ -10,6 +10,11 @@ const VideoList = ({ datasetId, filters = {}, sort, order, textFilter }) => {
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
     const [playingVideo, setPlayingVideo] = useState(null);
+    const prevDatasetId = useRef(datasetId);
+    const prevFilters = useRef(filters);
+    const prevSort = useRef(sort);
+    const prevOrder = useRef(order);
+    const prevTextFilter = useRef(textFilter);
 
     const API_URL = process.env.REACT_APP_API_URL;
     const PAGE_SIZE = 10;
@@ -30,7 +35,7 @@ const VideoList = ({ datasetId, filters = {}, sort, order, textFilter }) => {
         return params.toString();
     };
 
-    const fetchVideos = (pageNumber = 1) => {
+    const fetchVideos = async (pageNumber = 1) => {
         const captionFilters = Object.keys(filters.caption || {})
             .filter(key => filters.caption[key])
             .join(',');
@@ -39,36 +44,52 @@ const VideoList = ({ datasetId, filters = {}, sort, order, textFilter }) => {
 
         const serializedFilters = serializeFilters(filters);
 
-        axios.get(`${API_URL}/api/datasets/${datasetId}/videos?${serializedFilters}`, {
-            params: {
-                sort,
-                order,
-                page: pageNumber,
-                page_size: PAGE_SIZE,
-                caption_filters: captionFilters,
-                text_filter: textFilter
-            }
-        })
-            .then(response => {
-                const newVideos = response.data.videos;
-                setVideos(prevVideos => pageNumber === 1 ? newVideos : [...prevVideos, ...newVideos]);
-                setHasMore(newVideos.length === PAGE_SIZE);
-                setPage(pageNumber);
-            })
-            .catch(error => {
-                console.error('Error fetching videos:', error);
-            })
-            .finally(() => {
-                setLoading(false);
+        try {
+            const response = await axios.get(`${API_URL}/api/datasets/${datasetId}/videos`, {
+                params: {
+                    sort,
+                    order,
+                    page: pageNumber,
+                    page_size: PAGE_SIZE,
+                    caption_filters: captionFilters,
+                    text_filter: textFilter
+                }
             });
+            const newVideos = response.data.videos;
+            setVideos(prevVideos => pageNumber === 1 ? newVideos : [...prevVideos, ...newVideos]);
+            setHasMore(newVideos.length === PAGE_SIZE);
+            setPage(pageNumber);
+        } catch (error) {
+            console.error('Error fetching videos:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
-        fetchVideos(1);
+        if (
+            prevDatasetId.current !== datasetId ||
+            JSON.stringify(prevFilters.current) !== JSON.stringify(filters) ||
+            prevSort.current !== sort ||
+            prevOrder.current !== order ||
+            prevTextFilter.current !== textFilter
+        ) {
+            setVideos([]);
+            setPage(1);
+            setHasMore(true);
+            fetchVideos(1);
+            prevDatasetId.current = datasetId;
+            prevFilters.current = filters;
+            prevSort.current = sort;
+            prevOrder.current = order;
+            prevTextFilter.current = textFilter;
+        }
     }, [datasetId, filters, sort, order, textFilter]);
 
     const loadMoreVideos = () => {
-        fetchVideos(page + 1);
+        if (!loading && hasMore) {
+            fetchVideos(page + 1);
+        }
     };
 
     const handleThumbnailClick = (videoUrl) => {
@@ -83,6 +104,7 @@ const VideoList = ({ datasetId, filters = {}, sort, order, textFilter }) => {
                 hasMore={hasMore}
                 loader={<h4>Loading...</h4>}
                 endMessage={<p style={{ textAlign: 'center' }}><b>Yay! You have seen it all</b></p>}
+                scrollableTarget="scrollableDiv"
             >
                 {videos.length === 0 ? (
                     <p>No videos found</p>
@@ -105,6 +127,7 @@ const VideoList = ({ datasetId, filters = {}, sort, order, textFilter }) => {
                                                 alt={video.path}
                                                 width="100%"
                                                 height="auto"
+                                                role="img"
                                             />
                                             <div className="play-icon">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64">
@@ -135,4 +158,3 @@ const VideoList = ({ datasetId, filters = {}, sort, order, textFilter }) => {
 };
 
 export default VideoList;
-

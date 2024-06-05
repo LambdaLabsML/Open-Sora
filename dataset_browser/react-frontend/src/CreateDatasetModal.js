@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
 import './CreateDatasetModal.css';
-
-Modal.setAppElement('#root');
 
 const CreateDatasetModal = ({ isOpen, onClose, onCreate }) => {
     const [name, setName] = useState('');
@@ -11,6 +9,10 @@ const CreateDatasetModal = ({ isOpen, onClose, onCreate }) => {
     const [csvMetaDir, setCsvMetaDir] = useState('');
     const [videoClipDir, setVideoClipDir] = useState('');
     const [description, setDescription] = useState('');
+
+    useEffect(() => {
+        Modal.setAppElement('#root');
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
