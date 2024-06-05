@@ -2,7 +2,7 @@ import React from 'react';
 import { Range, getTrackBackground } from 'react-range';
 import './FilterSidebar.css';
 
-const FilterSidebar = ({ filterValues, filters, onFilterChange, onCheckboxChange, sort, onSortChange, order, onOrderChange }) => {
+const FilterSidebar = ({ filterValues, filters, onFilterChange, onCheckboxChange, sort, onSortChange, order, onOrderChange, textFilter, onTextFilterChange }) => {
 
     const renderRangeSlider = (key) => {
         const values = filters[key];
@@ -145,8 +145,18 @@ const FilterSidebar = ({ filterValues, filters, onFilterChange, onCheckboxChange
                     <option value="desc">Descending</option>
                 </select>
             </label>
+            <div className="text-filter-container">
+                <label>Text Filter:</label>
+                <input
+                    type="text"
+                    value={textFilter || ''}
+                    onChange={(e) => onTextFilterChange(e.target.value)}
+                    placeholder="Enter text to filter"
+                />
+            </div>
         </div>
     );
 };
 
 export default FilterSidebar;
+

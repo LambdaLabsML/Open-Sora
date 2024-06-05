@@ -11,6 +11,7 @@ const DatasetViewer = () => {
     const [filters, setFilters] = useState({});
     const [sort, setSort] = useState('aes');
     const [order, setOrder] = useState('desc');
+    const [textFilter, setTextFilter] = useState('');
 
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_API_URL}/api/datasets/${id}/filters`)
@@ -61,6 +62,10 @@ const DatasetViewer = () => {
         setOrder(e.target.value);
     };
 
+    const handleTextFilterChange = (value) => {
+        setTextFilter(value);
+    };
+
     return (
         <div className="dataset-viewer">
             <FilterSidebar
@@ -72,12 +77,15 @@ const DatasetViewer = () => {
                 onSortChange={handleSortChange}
                 order={order}
                 onOrderChange={handleOrderChange}
+                textFilter={textFilter}
+                onTextFilterChange={handleTextFilterChange}
             />
             <div className="main-content">
-                <VideoList datasetId={id} filters={filters} sort={sort} order={order} />
+                <VideoList datasetId={id} filters={filters} sort={sort} order={order} textFilter={textFilter} />
             </div>
         </div>
     );
 };
 
 export default DatasetViewer;
+

@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import LazyLoad from 'react-lazyload';
 import './VideoList.css';
 
-const VideoList = ({ datasetId, filters = {}, sort, order }) => {
+const VideoList = ({ datasetId, filters = {}, sort, order, textFilter }) => {
     const [videos, setVideos] = useState([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -45,7 +45,8 @@ const VideoList = ({ datasetId, filters = {}, sort, order }) => {
                 order,
                 page: pageNumber,
                 page_size: PAGE_SIZE,
-                caption_filters: captionFilters
+                caption_filters: captionFilters,
+                text_filter: textFilter
             }
         })
             .then(response => {
@@ -64,7 +65,7 @@ const VideoList = ({ datasetId, filters = {}, sort, order }) => {
 
     useEffect(() => {
         fetchVideos(1);
-    }, [datasetId, filters, sort, order]);
+    }, [datasetId, filters, sort, order, textFilter]);
 
     const loadMoreVideos = () => {
         fetchVideos(page + 1);
@@ -134,3 +135,4 @@ const VideoList = ({ datasetId, filters = {}, sort, order }) => {
 };
 
 export default VideoList;
+

@@ -204,7 +204,8 @@ def get_videos(_id):
     page = request.args.get('page', default=1, type=int)
     page_size = request.args.get('page_size', default=10, type=int)
     caption_filters = request.args.get('caption_filters', default='accepted', type=str).split(',')
-    logger.debug(f"get_videos(_id={_id}) - filters={filters}, sort_param={sort_param}, sort_order={sort_order}, page={page}, page_size={page_size}, caption_filters={caption_filters}")
+    text_filter = request.args.get('text_filter', default='', type=str)
+    logger.debug(f"get_videos(_id={_id}) - filters={filters}, sort_param={sort_param}, sort_order={sort_order}, page={page}, page_size={page_size}, caption_filters={caption_filters}, text_filter={text_filter}")
     filtered_df = df.copy()
     for filter_key, sub_filters in filters.items():
         if isinstance(sub_filters, dict):
@@ -219,6 +220,8 @@ def get_videos(_id):
         filtered_df = filtered_df[filtered_df['caption_category'].isin(caption_filters)]
     else:
         filtered_df = filtered_df[0:0]
+    if text_filter:
+        filtered_df = filtered_df[filtered_df['text'].str.contains(text_filter, case=False, na=False)]
     if sort_param:
         filtered_df = filtered_df.sort_values(by=sort_param, ascending=(sort_order == 'asc'))
     total_videos = len(filtered_df)
@@ -232,6 +235,7 @@ def get_videos(_id):
         'page_size': page_size,
         'videos': paginated_df.to_dict(orient='records')
     })
+
 
 @api.route('/datasets/<_id>/filters', methods=['GET'])
 def get_filters(_id):
