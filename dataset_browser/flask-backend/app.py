@@ -245,7 +245,7 @@ def get_videos(_id):
 def get_filters(_id):
     if _id not in datasets or datasets[_id]['status'] != 'created':
         return jsonify({'error': 'Dataset not found or not yet created'}), 404
-    df = dataframes[_id]  # Use the dataframe stored in memory
+    df = dataframes[_id].dropna()  # Use the dataframe stored in memory
     filters = {}
     if 'num_frames' in df.columns:
         filters['num_frames'] = {'min': int(df['num_frames'].min()), 'max': int(df['num_frames'].max())}
