@@ -254,7 +254,7 @@ def get_min_max_column(df, column):
     if df[column].dtype == 'object':
         print(f'BAD COLUMN: {column}')
         df[column] = pd.to_numeric(df[column], errors='coerce')
-    if df[column].dropna(subset=[column]).empty:
+    if df[column].dropna().empty:
         return {'min': -1, 'max': -1}
     else:
         try:
