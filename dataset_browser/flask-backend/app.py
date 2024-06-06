@@ -242,7 +242,13 @@ def get_videos(_id):
     })
 
 def get_min_max_column(df, column):
-    if column not in df.columns or df[column].dropna().empty:
+
+    if column not in df.columns:
+        return {'min': -1, 'max': -1}
+    if column.dtype == 'object':
+        print(f'BAD COLUMN: {column}')
+        column = pd.to_numeric(column, errors='coerce')
+    if df[column].dropna().empty:
         return {'min': -1, 'max': -1}
     else:
         min_val = column.min()
