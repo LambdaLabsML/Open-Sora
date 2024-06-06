@@ -256,7 +256,7 @@ def get_min_max_column(df, column):
             max_val = column.max()
         except Exception as e:
             print(f'BAD COLUMN: {column}')
-            raise e
+            return {'min': -1, 'max': -1}
         # Convert int64 to Python int
         if isinstance(min_val, np.int64):
             min_val = int(min_val)
