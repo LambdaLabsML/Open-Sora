@@ -247,13 +247,13 @@ def get_filters(_id):
         return jsonify({'error': 'Dataset not found or not yet created'}), 404
     df = dataframes[_id]  # Use the dataframe stored in memory
     filters = {
-        'num_frames': {'min': df['num_frames'].min(), 'max': df['num_frames'].max()},
+        'num_frames': {'min': int(df['num_frames'].min()), 'max': int(df['num_frames'].max())},
         'aes': {'min': df['aes'].min(), 'max': df['aes'].max()},
         'aspect_ratio': {'min': df['aspect_ratio'].min(), 'max': df['aspect_ratio'].max()},
         'fps': {'min': df['fps'].min(), 'max': df['fps'].max()},
-        'height': {'min': df['height'].min(), 'max': df['height'].max()},
-        'resolution': {'min': df['resolution'].min(), 'max': df['resolution'].max()},
-        'width': {'min': df['width'].min(), 'max': df['width'].max()}
+        'height': {'min': int(df['height'].min()), 'max': int(df['height'].max())},
+        'resolution': {'min': int(df['resolution'].min()), 'max': int(df['resolution'].max())},
+        'width': {'min': int(df['width'].min()), 'max': int(df['width'].max())}
     }
     return jsonify(filters)
 
