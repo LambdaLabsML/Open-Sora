@@ -246,15 +246,42 @@ def get_filters(_id):
     if _id not in datasets or datasets[_id]['status'] != 'created':
         return jsonify({'error': 'Dataset not found or not yet created'}), 404
     df = dataframes[_id]  # Use the dataframe stored in memory
-    filters = {
-        'num_frames': {'min': int(df['num_frames'].min()), 'max': int(df['num_frames'].max())},
-        'aes': {'min': df['aes'].min(), 'max': df['aes'].max()},
-        'aspect_ratio': {'min': df['aspect_ratio'].min(), 'max': df['aspect_ratio'].max()},
-        'fps': {'min': df['fps'].min(), 'max': df['fps'].max()},
-        'height': {'min': int(df['height'].min()), 'max': int(df['height'].max())},
-        'resolution': {'min': int(df['resolution'].min()), 'max': int(df['resolution'].max())},
-        'width': {'min': int(df['width'].min()), 'max': int(df['width'].max())}
-    }
+    filters = {}
+    if 'num_frames' in df.columns:
+        filters['num_frames'] = {'min': int(df['num_frames'].min()), 'max': int(df['num_frames'].max())}
+    else:
+        filters['num_frames'] = {'min': -1, 'max': -1}
+
+    if 'aes' in df.columns:
+        filters['aes'] = {'min': df['aes'].min(), 'max': df['aes'].max()}
+    else:
+        filters['aes'] = {'min': -1, 'max': -1}
+
+    if 'aspect_ratio' in df.columns:
+        filters['aspect_ratio'] = {'min': df['aspect_ratio'].min(), 'max': df['aspect_ratio'].max()}
+    else:
+        filters['aspect_ratio'] = {'min': -1, 'max': -1}
+
+    if 'fps' in df.columns:
+        filters['fps'] = {'min': df['fps'].min(), 'max': df['fps'].max()}
+    else:
+        filters['fps'] = {'min': -1, 'max': -1}
+
+    if 'height' in df.columns:
+        filters['height'] = {'min': int(df['height'].min()), 'max': int(df['height'].max())}
+    else:
+        filters['height'] = {'min': -1, 'max': -1}
+
+    if 'resolution' in df.columns:
+        filters['resolution'] = {'min': int(df['resolution'].min()), 'max': int(df['resolution'].max())}
+    else:
+        filters['resolution'] = {'min': -1, 'max': -1}
+
+    if 'width' in df.columns:
+        filters['width'] = {'min': int(df['width'].min()), 'max': int(df['width'].max())}
+    else:
+        filters['width'] = {'min': -1, 'max': -1}
+
     return jsonify(filters)
 
 @api.route('/datasets/<_id>/thumbnails/<path:filename>')
