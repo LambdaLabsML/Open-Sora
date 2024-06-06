@@ -245,9 +245,9 @@ def get_min_max_column(df, column):
 
     if column not in df.columns:
         return {'min': -1, 'max': -1}
-    if column.dtype == 'object':
+    if df[column].dtype == 'object':
         print(f'BAD COLUMN: {column}')
-        column = pd.to_numeric(column, errors='coerce')
+        df[column] = pd.to_numeric(df[column], errors='coerce')
     if df[column].dropna().empty:
         return {'min': -1, 'max': -1}
     else:
