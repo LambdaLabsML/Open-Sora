@@ -218,6 +218,7 @@ def get_videos(_id):
             if min_val is not None and min_val != -1 and max_val is not None and max_val != -1:
                 min_val = float(min_val)
                 max_val = float(max_val)
+                logger.debug(f"get_videos - filter_key={filter_key}, min_val={min_val}, max_val={max_val}")
                 filtered_df = filtered_df[(filtered_df[filter_key] >= min_val) & (filtered_df[filter_key] <= max_val)]
         elif isinstance(sub_filters, str):
             filtered_df = filtered_df[filter_key].str.contains(sub_filters, case=False, na=False)
