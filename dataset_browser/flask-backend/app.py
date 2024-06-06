@@ -1,3 +1,4 @@
+import numpy as np
 from flask import Flask, jsonify, request, send_from_directory, Blueprint
 from flask_cors import CORS
 import pandas as pd
@@ -240,47 +241,28 @@ def get_videos(_id):
         'videos': paginated_df.to_dict(orient='records')
     })
 
+def get_min_max_column(df, column):
+    if column not in df.columns or df[column].dropna().empty:
+        return {'min': -1, 'max': -1}
+    else:
+        min_val = column.min()
+        max_val = column.max()
+        # Convert int64 to Python int
+        if isinstance(min_val, np.int64):
+            min_val = int(min_val)
+        if isinstance(max_val, np.int64):
+            max_val = int(max_val)
+        return {'min': min_val, 'max': max_val}
 
 @api.route('/datasets/<_id>/filters', methods=['GET'])
 def get_filters(_id):
     if _id not in datasets or datasets[_id]['status'] != 'created':
         return jsonify({'error': 'Dataset not found or not yet created'}), 404
-    df = dataframes[_id].dropna()  # Use the dataframe stored in memory
+    df = dataframes[_id]  # Use the dataframe stored in memory
+
     filters = {}
-    if 'num_frames' in df.columns:
-        filters['num_frames'] = {'min': int(df['num_frames'].min()), 'max': int(df['num_frames'].max())}
-    else:
-        filters['num_frames'] = {'min': -1, 'max': -1}
-
-    if 'aes' in df.columns:
-        filters['aes'] = {'min': df['aes'].min(), 'max': df['aes'].max()}
-    else:
-        filters['aes'] = {'min': -1, 'max': -1}
-
-    if 'aspect_ratio' in df.columns:
-        filters['aspect_ratio'] = {'min': df['aspect_ratio'].min(), 'max': df['aspect_ratio'].max()}
-    else:
-        filters['aspect_ratio'] = {'min': -1, 'max': -1}
-
-    if 'fps' in df.columns:
-        filters['fps'] = {'min': df['fps'].min(), 'max': df['fps'].max()}
-    else:
-        filters['fps'] = {'min': -1, 'max': -1}
-
-    if 'height' in df.columns:
-        filters['height'] = {'min': int(df['height'].min()), 'max': int(df['height'].max())}
-    else:
-        filters['height'] = {'min': -1, 'max': -1}
-
-    if 'resolution' in df.columns:
-        filters['resolution'] = {'min': int(df['resolution'].min()), 'max': int(df['resolution'].max())}
-    else:
-        filters['resolution'] = {'min': -1, 'max': -1}
-
-    if 'width' in df.columns:
-        filters['width'] = {'min': int(df['width'].min()), 'max': int(df['width'].max())}
-    else:
-        filters['width'] = {'min': -1, 'max': -1}
+    for column in ['num_frames', 'aes', 'aspect_ratio', 'fps', 'height', 'resolution', 'width']:
+        filters[column] = get_min_max_column(df, column)
 
     return jsonify(filters)
 
