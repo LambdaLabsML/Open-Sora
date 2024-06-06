@@ -236,6 +236,7 @@ def get_videos(_id):
     end = start + page_size
     paginated_df = filtered_df[start:end]
     paginated_df = paginated_df.where(pd.notnull(paginated_df), None)
+    logger.debug(f"paginated_df={paginated_df}")
     return jsonify({
         'total': total_videos,
         'page': page,
