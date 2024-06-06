@@ -235,8 +235,11 @@ def get_videos(_id):
     start = (page - 1) * page_size
     end = start + page_size
     paginated_df = filtered_df[start:end]
-    paginated_df = paginated_df.where(pd.notnull(paginated_df), None)
-    logger.debug(f"paginated_df={paginated_df}")
+
+    paginated_df = paginated_df.applymap(lambda x: None if pd.isna(x) else x)
+
+    logger.debug(f"paginated_df (after NaN replacement) = {paginated_df}")
+
     return jsonify({
         'total': total_videos,
         'page': page,
