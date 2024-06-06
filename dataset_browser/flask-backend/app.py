@@ -251,8 +251,12 @@ def get_min_max_column(df, column):
     if df[column].dropna().empty:
         return {'min': -1, 'max': -1}
     else:
-        min_val = column.min()
-        max_val = column.max()
+        try:
+            min_val = column.min()
+            max_val = column.max()
+        except Exception as e:
+            print(f'BAD COLUMN: {column}')
+            raise e
         # Convert int64 to Python int
         if isinstance(min_val, np.int64):
             min_val = int(min_val)
