@@ -97,7 +97,7 @@ def create_thumbnail(video_path, thumbnail_path):
     try:
         cap = cv2.VideoCapture(str(video_path))
         if not cap.isOpened():
-            print(f"Error opening video file {video_path}")
+            logger.error(f"Error opening video file {video_path}")
             return
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         middle_frame = total_frames // 2
@@ -113,7 +113,7 @@ def create_thumbnail(video_path, thumbnail_path):
             cv2.imwrite(str(thumbnail_path), frame)
         cap.release()
     except Exception as e:
-        print(f"Error creating thumbnail for {video_path}: {e}")
+        logger.error(f"Error creating thumbnail for {video_path}: {e}")
 
 def ensure_thumbnails(video_files, thumbnail_dir):
     logger.debug(f"ensure_thumbnails(len(video_files)={len(video_files)}, thumbnail_dir={thumbnail_dir})")
@@ -248,20 +248,22 @@ def get_videos(_id):
     })
 
 def get_min_max_column(df, column):
-
+    logger.debug(f"get_min_max_column(df, column={column}), df[column].dtype = {df[column].dtype}")
     if column not in df.columns:
+        logger.warning(f'column not in df.columns: {column}')
         return {'min': -1, 'max': -1}
     if df[column].dtype == 'object':
-        print(f'BAD COLUMN: {column}')
+        logger.warning(f'column is object: {column}')
         df[column] = pd.to_numeric(df[column], errors='coerce')
     if df[column].dropna().empty:
+        logger.warning(f'column is empty: {column}')
         return {'min': -1, 'max': -1}
     else:
         try:
-            min_val = column.min()
-            max_val = column.max()
+            min_val = df[column].min()
+            max_val = df[column].max()
         except Exception as e:
-            print(f'BAD COLUMN: {column}')
+            logger.error(f'Error getting min/max for column {column}: {e}')
             return {'min': -1, 'max': -1}
         # Convert int64 to Python int
         if isinstance(min_val, np.int64):
