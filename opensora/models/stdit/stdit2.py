@@ -111,10 +111,7 @@ class STDiT2Block(nn.Module):
             x_m_zero = t2i_modulate(self.norm1(x), shift_msa_zero, scale_msa_zero)
             x_m = self.t_mask_select(x_mask, x_m, x_m_zero, T, S)
 
-        # spatial branch
-        x_s = rearrange(x_m, "B (T S) C -> (B T) S C", T=T, S=S)
-        x_s = self.attn(x_s)
-        x_s = rearrange(x_s, "(B T) S C -> B (T S) C", T=T, S=S)
+        x_s = self.attn(x_m)
         if x_mask is not None:
             x_s_zero = gate_msa_zero * x_s
             x_s = gate_msa * x_s
@@ -122,24 +119,6 @@ class STDiT2Block(nn.Module):
         else:
             x_s = gate_msa * x_s
         x = x + self.drop_path(x_s)
-
-        # modulate
-        x_m = t2i_modulate(self.norm_temp(x), shift_tmp, scale_tmp)
-        if x_mask is not None:
-            x_m_zero = t2i_modulate(self.norm_temp(x), shift_tmp_zero, scale_tmp_zero)
-            x_m = self.t_mask_select(x_mask, x_m, x_m_zero, T, S)
-
-        # temporal branch
-        x_t = rearrange(x_m, "B (T S) C -> (B S) T C", T=T, S=S)
-        x_t = self.attn_temp(x_t)
-        x_t = rearrange(x_t, "(B S) T C -> B (T S) C", T=T, S=S)
-        if x_mask is not None:
-            x_t_zero = gate_tmp_zero * x_t
-            x_t = gate_tmp * x_t
-            x_t = self.t_mask_select(x_mask, x_t, x_t_zero, T, S)
-        else:
-            x_t = gate_tmp * x_t
-        x = x + self.drop_path(x_t)
 
         # cross attn
         x = x + self.cross_attn(x, y, mask)
