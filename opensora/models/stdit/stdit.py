@@ -432,7 +432,9 @@ class STDiT(nn.Module):
 
 @MODELS.register_module("STDiT-XL/2")
 def STDiT_XL_2(from_pretrained=None, **kwargs):
-    model = STDiT(depth=28, hidden_size=1152, patch_size=(1, 2, 2), num_heads=16, **kwargs)
+    if "patch_size" not in kwargs:
+        kwargs["patch_size"] = (1, 2, 2)
+    model = STDiT(depth=28, hidden_size=1152, num_heads=16, **kwargs)
     if from_pretrained is not None:
         load_checkpoint(model, from_pretrained)
     return model

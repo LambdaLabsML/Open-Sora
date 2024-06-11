@@ -66,18 +66,6 @@ class STDiT2Block(nn.Module):
         )
         self.drop_path = DropPath(drop_path) if drop_path > 0.0 else nn.Identity()
 
-        # temporal branch
-        self.norm_temp = get_layernorm(hidden_size, eps=1e-6, affine=False, use_kernel=enable_layernorm_kernel)  # new
-        self.attn_temp = Attention(
-            hidden_size,
-            num_heads=num_heads,
-            qkv_bias=True,
-            enable_flash_attn=self.enable_flash_attn,
-            rope=rope,
-            qk_norm=qk_norm,
-        )
-        self.scale_shift_table_temporal = nn.Parameter(torch.randn(3, hidden_size) / hidden_size**0.5)  # new
-
     def t_mask_select(self, x_mask, x, masked_x, T, S):
         # x: [B, (T, S), C]
         # mased_x: [B, (T, S), C]
@@ -94,16 +82,10 @@ class STDiT2Block(nn.Module):
         shift_msa, scale_msa, gate_msa, shift_mlp, scale_mlp, gate_mlp = (
             self.scale_shift_table[None] + t.reshape(B, 6, -1)
         ).chunk(6, dim=1)
-        shift_tmp, scale_tmp, gate_tmp = (self.scale_shift_table_temporal[None] + t_tmp.reshape(B, 3, -1)).chunk(
-            3, dim=1
-        )
         if x_mask is not None:
             shift_msa_zero, scale_msa_zero, gate_msa_zero, shift_mlp_zero, scale_mlp_zero, gate_mlp_zero = (
                 self.scale_shift_table[None] + t0.reshape(B, 6, -1)
             ).chunk(6, dim=1)
-            shift_tmp_zero, scale_tmp_zero, gate_tmp_zero = (
-                self.scale_shift_table_temporal[None] + t0_tmp.reshape(B, 3, -1)
-            ).chunk(3, dim=1)
 
         # modulate
         x_m = t2i_modulate(self.norm1(x), shift_msa, scale_msa)
@@ -151,7 +133,7 @@ class STDiT2Config(PretrainedConfig):
         input_size=(None, None, None),
         input_sq_size=32,
         in_channels=4,
-        patch_size=(1, 2, 2),
+        patch_size=(3, 4, 4,),
         hidden_size=1152,
         depth=28,
         num_heads=16,
@@ -256,7 +238,7 @@ class STDiT2(PreTrainedModel):
 
         # init model
         self.initialize_weights()
-        self.initialize_temporal()
+        # self.initialize_temporal()
         if config.freeze is not None:
             assert config.freeze in ["not_temporal", "text"]
             if config.freeze == "not_temporal":
@@ -488,7 +470,6 @@ def STDiT2_XL_2(from_pretrained=None, **kwargs):
             config = STDiT2Config(
                 depth=28,
                 hidden_size=1152,
-                patch_size=(1, 2, 2),
                 num_heads=16, **kwargs
             )
             model = STDiT2(config)
@@ -502,7 +483,6 @@ def STDiT2_XL_2(from_pretrained=None, **kwargs):
         config = STDiT2Config(
             depth=28,
             hidden_size=1152,
-            patch_size=(1, 2, 2),
             num_heads=16, **kwargs
         )
         model = STDiT2(config)
