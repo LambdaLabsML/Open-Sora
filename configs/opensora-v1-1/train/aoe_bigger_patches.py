@@ -8,8 +8,8 @@ dataset = dict(
     transform_name="resize_crop",
 )
 bucket_config = {
-    "360p": {1: (1.0, 1024), 32: (1.0, 32), 64: (1.0, 16)},
-    "480p": {1: (0.5, 512), 32: (0.5, 16), 64: (0.5, 8)},
+    "360p": {1: (1.0, 256), 32: (1.0, 8), 64: (1.0, 4)},
+    "480p": {1: (0.5, 128), 32: (0.5, 4), 64: (0.5, 2)},
 }
 mask_ratios = None
 
@@ -120,4 +120,4 @@ eval_steps = ckpt_every
 wandb_project_name = "lego-attention"
 wandb_project_entity = "lambdalabs"
 
-exp_id = "aoe-bigger-patches"
+exp_id = "aoe-bigger-patches-stride1"
