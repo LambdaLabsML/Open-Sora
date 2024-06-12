@@ -133,7 +133,8 @@ class STDiT2Config(PretrainedConfig):
         input_size=(None, None, None),
         input_sq_size=32,
         in_channels=4,
-        patch_size=(3, 4, 4,),
+        patch_size=(3, 4, 4),
+        patch_stride=(2, 4, 4),
         hidden_size=1152,
         depth=28,
         num_heads=16,
@@ -154,6 +155,7 @@ class STDiT2Config(PretrainedConfig):
         self.input_sq_size = input_sq_size
         self.in_channels = in_channels
         self.patch_size = patch_size
+        self.patch_stride = patch_stride
         self.hidden_size = hidden_size
         self.depth = depth
         self.num_heads = num_heads
@@ -194,11 +196,12 @@ class STDiT2(PreTrainedModel):
 
         # support dynamic input
         self.patch_size = config.patch_size
+        self.patch_stride = config.patch_stride
         self.input_size = config.input_size
         self.input_sq_size = config.input_sq_size
         self.pos_embed = PositionEmbedding2D(config.hidden_size)
 
-        self.x_embedder = PatchEmbed3D(config.patch_size, config.in_channels, config.hidden_size)
+        self.x_embedder = PatchEmbed3D(config.patch_size, config.patch_stride, config.in_channels, config.hidden_size)
         self.t_embedder = TimestepEmbedder(config.hidden_size)
         self.t_block = nn.Sequential(nn.SiLU(), nn.Linear(config.hidden_size, 6 * config.hidden_size, bias=True))
         self.t_block_temp = nn.Sequential(nn.SiLU(), nn.Linear(config.hidden_size, 3 * config.hidden_size, bias=True))  # new
@@ -254,9 +257,9 @@ class STDiT2(PreTrainedModel):
             H += self.patch_size[1] - H % self.patch_size[1]
         if W % self.patch_size[2] != 0:
             W += self.patch_size[2] - W % self.patch_size[2]
-        T = T // self.patch_size[0]
-        H = H // self.patch_size[1]
-        W = W // self.patch_size[2]
+        T = T // self.patch_stride[0]
+        H = H // self.patch_stride[1]
+        W = W // self.patch_stride[2]
         return (T, H, W)
 
     def forward(
@@ -273,7 +276,7 @@ class STDiT2(PreTrainedModel):
         Returns:
             x (torch.Tensor): output latent representation; of shape [B, C, T, H, W]
         """
-        B = x.shape[0]
+        B, _, Tx, Hx, Wx = x.shape
         dtype = self.x_embedder.proj.weight.dtype
         x = x.to(dtype)
         timestep = timestep.to(dtype)
@@ -296,16 +299,16 @@ class STDiT2(PreTrainedModel):
         fl = self.fl_embedder(fl, B)
         fl = fl + self.fps_embedder(fps, B)
 
+        x_src = x
+        x, (T, H, W) = self.x_embedder(x)  # [B, N, C]
+
         # === get dynamic shape size ===
-        _, _, Tx, Hx, Wx = x.size()
-        T, H, W = self.get_dynamic_size(x)
         S = H * W
         scale = rs / self.input_sq_size
         base_size = round(S**0.5)
-        pos_emb = self.pos_embed(x, H, W, scale=scale, base_size=base_size)
+        pos_emb = self.pos_embed(x_src, H, W, scale=scale, base_size=base_size)
 
         # embedding
-        x = self.x_embedder(x)  # [B, N, C]
         x = rearrange(x, "B (T S) C -> B T S C", T=T, S=S)
         x = x + pos_emb
         x = rearrange(x, "B T S C -> B (T S) C")

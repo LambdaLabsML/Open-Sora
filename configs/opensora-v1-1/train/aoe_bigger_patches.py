@@ -29,7 +29,8 @@ model = dict(
     qk_norm=True,
     enable_flash_attn=True,
     enable_layernorm_kernel=True,
-    patch_size=(3, 4, 4),
+    patch_size=(3, 2, 2),
+    patch_stride=(2, 2, 2),
 )
 vae = dict(
     type="VideoAutoencoderKL",
@@ -50,7 +51,7 @@ scheduler = dict(
 )
 scheduler_inference = dict(
     type="iddpm",
-    num_sampling_steps=100,
+    num_sampling_steps=300,
     cfg_scale=7.0,
     cfg_channel=3,  # or None
 )
@@ -69,7 +70,7 @@ lr_schedule = "1cycle"
 anneal_strategy = "cos"
 warmup_steps = 1000
 cooldown_steps = 1000
-lr = 1e-6
+lr = 1e-5
 min_lr = 1e-7
 max_lr = 4e-5
 

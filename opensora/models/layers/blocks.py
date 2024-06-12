@@ -89,6 +89,7 @@ class PatchEmbed3D(nn.Module):
     def __init__(
         self,
         patch_size=(2, 4, 4),
+        patch_stride=(2, 4, 4),
         in_chans=3,
         embed_dim=96,
         norm_layer=None,
@@ -101,7 +102,7 @@ class PatchEmbed3D(nn.Module):
         self.in_chans = in_chans
         self.embed_dim = embed_dim
 
-        self.proj = nn.Conv3d(in_chans, embed_dim, kernel_size=patch_size, stride=(1, patch_size[1], patch_size[2]))
+        self.proj = nn.Conv3d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_stride)
         if norm_layer is not None:
             self.norm = norm_layer(embed_dim)
         else:
@@ -119,14 +120,14 @@ class PatchEmbed3D(nn.Module):
             x = F.pad(x, (0, 0, 0, 0, 0, self.patch_size[0] - D % self.patch_size[0]))
 
         x = self.proj(x)  # (B C T H W)
+        _, _, D, Wh, Ww = x.shape
         if self.norm is not None:
-            D, Wh, Ww = x.size(2), x.size(3), x.size(4)
             x = x.flatten(2).transpose(1, 2)
             x = self.norm(x)
             x = x.transpose(1, 2).view(-1, self.embed_dim, D, Wh, Ww)
         if self.flatten:
             x = x.flatten(2).transpose(1, 2)  # BCTHW -> BNC
-        return x
+        return x, (D, Wh, Ww)
 
 
 class Attention(nn.Module):
