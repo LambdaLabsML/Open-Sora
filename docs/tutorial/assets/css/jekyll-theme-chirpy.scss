@@ -1,0 +1,40 @@
+---
+---
+
+@import 'main
+{%- if jekyll.environment == 'production' -%}
+  .bundle
+{%- endif -%}
+';
+
+@import 'colors/typography-dark.scss';
+@import 'colors/typography-light.scss';
+
+/* append your custom style below */
+.todo { background: red ;}; 
+
+html {
+    font-size: 16px;
+  
+    @media (prefers-color-scheme: light) {
+      &:not([data-mode]),
+      &[data-mode='light'] {
+        @include light-scheme;
+      }
+  
+      &[data-mode='dark'] {
+        @include dark-scheme;
+      }
+    }
+  
+    @media (prefers-color-scheme: dark) {
+      &:not([data-mode]),
+      &[data-mode='dark'] {
+        @include dark-scheme;
+      }
+  
+      &[data-mode='light'] {
+        @include light-scheme;
+      }
+    }
+  }

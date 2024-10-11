@@ -1,0 +1,112 @@
+/*
+ * The syntax light mode typography colors
+ */
+
+ @mixin light-scheme {
+  /* Framework color */
+  --main-bg: #ffffff; /* white */
+  --mask-bg: #c1c3c5;
+  --main-border-color: #f3f3f3;
+
+  /* Common color */
+  --text-color: #262626; /* charcoal */
+  --text-muted-color: #757575; /* retained from original */
+  --text-muted-highlight-color: inherit;
+  --heading-color: #262626; /* charcoal */
+  --label-color: #262626; /* charcoal */
+  --blockquote-border-color: #eeeeee;
+  --blockquote-text-color: #757575; /* retained from original */
+  --link-color: #7030c4; /* purple (primary) */
+  --link-underline-color: #7030c4; /* purple (primary) */
+  --button-bg: #7030c4; /* purple (primary) */
+  --btn-border-color: #7030c4; /* purple (primary) */
+  --btn-backtotop-color: white; /* charcoal */
+  --btn-backtotop-border-color: #7030c4; /* purple (primary) */
+  --btn-box-shadow: #eaeaea; /* retained from original */
+  --checkbox-color: #d200b0; /* magenta (secondary) */
+  --checkbox-checked-color: #d200b0; /* magenta (secondary) */
+  --img-bg: radial-gradient(
+    circle,
+    #ffffff 0%, /* white */
+    #efefef 100% /* light gray */
+  );
+  --shimmer-bg: linear-gradient(
+    90deg,
+    rgba(250, 250, 250, 0) 0%,
+    rgba(232, 230, 230, 1) 50%,
+    rgba(250, 250, 250, 0) 100%
+  );
+
+  /* Sidebar */
+  --site-title-color: #707070; /* Converted rgb(113,113,113) to hex */
+  --site-subtitle-color: #717171;
+  --sidebar-bg: #f6f8fa;
+  --sidebar-border-color: #efefef;
+  --sidebar-muted-color: #545454;
+  --sidebar-active-color: #262626; /* charcoal */
+  --sidebar-hover-bg: rgba(223, 233, 241, 0.64); /* Retained as rgba */
+  --sidebar-btn-bg: #ffffff; /* white */
+  --sidebar-btn-color: #8e8e8e;
+  --avatar-border-color: #ffffff; /* white */
+
+  /* Topbar */
+  --topbar-bg: rgba(255, 255, 255, 0.7); /* Retained as rgba */
+  --topbar-text-color: #4e4e4e; /* Converted rgb(78,78,78) to hex */
+  --search-border-color: #f0f0f0; /* Converted rgb(240,240,240) to hex */
+  --search-icon-color: #c2c6cc;
+  --input-focus-border-color: #b8b8b8;
+
+  /* Home page */
+  --post-list-text-color: #696969; /* dimgray to hex */
+  --btn-patinator-text-color: #555555;
+  --btn-paginator-hover-color: #f6f8fa; /* --sidebar-bg */
+
+  /* Posts */
+  --toc-highlight: #7030c4; /* retained as is (blue-700) */
+  --btn-share-color: #808080; /* gray to hex */
+  --btn-share-hover-color: #0d6efd; /* retained as is (blue) */
+  --card-bg: #ffffff; /* white */
+  --card-hovor-bg: #e2e2e2;
+  --card-shadow: rgba(104, 104, 104, 0.05) 0 2px 6px 0,
+    rgba(211, 209, 209, 0.15) 0 0 0 1px;
+  --footnote-target-bg: #e0ffff; /* lightcyan to hex */
+  --tb-odd-bg: #fbfcfd;
+  --tb-border-color: #eaeaea;
+  --dash-color: #c0c0c0; /* silver to hex */
+  --kbd-wrap-color: #bdbdbd;
+  --kbd-text-color: #262626; /* charcoal */
+  --kbd-bg-color: #ffffff; /* white */
+  --prompt-text-color: rgba(46, 46, 46, 0.77); /* retained as rgba */
+  --prompt-tip-bg: rgba(112, 48, 196, 0.1); /* retained as rgba */
+  --prompt-tip-icon-color: rgba(112, 48, 196, 1); /* retained as rgba */
+  --prompt-info-bg: #e1f5fe;
+  --prompt-info-icon-color: #0070cb;
+  --prompt-warning-bg: #fff3cd; /* converted rgb(255,243,205) to hex */
+  --prompt-warning-icon-color: #ef9c03;
+  --prompt-danger-bg: #f8d7da; /* converted rgb(248,215,218) to hex */
+  --prompt-danger-icon-color: #df3c30;
+
+  /* Tags */
+  --tag-border: #dee2e6;
+  --tag-shadow: #e9ecef; /* --btn-border-color */
+  --tag-hover: #dee2e6; /* converted rgb(222,226,230) to hex */
+  --search-tag-bg: #f8f9fa;
+
+  /* Categories */
+  --categories-border: rgba(0, 0, 0, 0.125); /* retained as rgba */
+  --categories-hover-bg: #e9ecef; /* --btn-border-color */
+  --categories-icon-hover-color: #2f4f4f; /* darkslategray to hex */
+
+  /* Archive */
+  --timeline-color: rgba(0, 0, 0, 0.075); /* retained as rgba */
+  --timeline-node-bg: #c2c6cc;
+  --timeline-year-dot-color: #ffffff; /* white */
+
+  [class^='prompt-'] {
+    --link-underline-color: #dbd8d8; /* Converted rgb(219,216,216) to hex */
+  }
+
+  .dark {
+    display: none;
+  }
+} /* light-scheme */
