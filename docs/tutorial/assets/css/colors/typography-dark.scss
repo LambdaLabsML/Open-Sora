@@ -1,0 +1,168 @@
+/*
+ * The main dark mode styles
+ */
+
+@mixin dark-scheme {
+  /* Framework color */
+  --main-bg: #1b1b1e; /* Converted rgb(27, 27, 30) to hex */
+  --mask-bg: #444546; /* Converted rgb(68,69,70) to hex */
+  --main-border-color: #2c2d2d; /* Converted rgb(44,45,45) to hex */
+
+  /* Common color */
+  --text-color: white; /* charcoal */
+  --text-muted-color: gray; /* retained from original */
+  --text-muted-highlight-color: #aeaeae; /* retained from original */
+  --heading-color: #fafafa; /* charcoal */
+  --label-color: #fafafa; /* charcoal */
+  --blockquote-border-color: #424242; /* Converted rgb(66,66,66) to hex */
+  --blockquote-text-color: #868686; /* retained from original */
+  --link-color: #b9b1fd; /* purple (primary) */
+  --link-underline-color: #b9b1fd; /* purple (primary) */
+  --button-bg: #b9b1fd; /* purple (primary) */
+  --btn-border-color: #b9b1fd; /* purple (primary) */
+  --btn-backtotop-color: white; /* charcoal */
+  --btn-backtotop-border-color: #212122; /* retained from original */
+  --btn-box-shadow: #1b1b1e; /* --main-bg */
+  --card-header-bg: #292929; /* retained from original */
+  --checkbox-color: #d200b0; /* magenta (secondary) */
+  --checkbox-checked-color: #b9b1fd; /* purple (primary) */
+  --img-bg: radial-gradient(circle, #161618 0%, #202020 100%);
+  --shimmer-bg: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(3a, 37, 37, 0.4) 50%, /* Converted rgb(58,55,55) to hex */
+    rgba(255, 255, 255, 0) 100%
+  );
+
+  /* Sidebar */
+  --site-title-color: #717070; /* Converted rgb(113,113,113) to hex */
+  --site-subtitle-color: #868686; /* retained from original */
+  --sidebar-bg: #1e1e1e; /* retained from original */
+  --sidebar-border-color: #292929; /* retained from original */
+  --sidebar-muted-color: #868686; /* retained from original */
+  --sidebar-active-color: #b9b1fd; /* purple (primary) */
+  --sidebar-hover-bg: #262626; /* retained from original */
+  --sidebar-btn-bg: #232328; /* retained from original */
+  --sidebar-btn-color: #787878; /* retained from original */
+  --avatar-border-color: #cecce6; /* Converted rgba(206,206,206,0.9) to hex with opacity if possible */
+
+  /* Topbar */
+  --topbar-bg: rgba(27, 27, 30, 0.64); /* Retained as rgba */
+  --topbar-text-color: #262626; /* charcoal */
+  --search-border-color: #373737; /* Converted rgb(55,55,55) to hex */
+  --search-icon-color: #646669; /* Converted rgb(100,102,105) to hex */
+  --input-focus-border-color: #707273; /* Converted rgb(112,114,115) to hex */
+
+  /* Home page */
+  --post-list-text-color: #262626; /* charcoal */
+  --btn-patinator-text-color: #262626; /* charcoal */
+  --btn-paginator-hover-color: #2e2e2e; /* retained from original */
+
+  /* Posts */
+  --toc-highlight: #b9b1fd; /* changed from rgb(116,178,243) to purple */
+  --tag-hover: #d200b0; /* magenta (secondary) */
+  --tb-odd-bg: #252526; /* retained from original */
+  --tb-even-bg: #1f1f22; /* Converted rgb(31,31,34) to hex */
+  --tb-border-color: #252526; /* --tb-odd-bg */
+  --footnote-target-bg: #3f51b5; /* Converted rgb(63,81,181) to hex */
+  --btn-share-color: #6c757d; /* retained from original */
+  --btn-share-hover-color: #bfc1ca; /* retained from original */
+  --card-bg: #1e1e1e; /* retained from original */
+  --card-hovor-bg: #464d51; /* retained from original */
+  --card-shadow: rgba(15, 15, 15, 0.72) 0 6px 18px 0,
+    rgba(89, 87, 87, 0.24) 0 0 0 1px; /* Converted rgb(21,21,21,0.72) and rgb(137,135,135,0.24) to hex where possible */
+  --kbd-wrap-color: #6a6a6a; /* retained from original */
+  --kbd-text-color: #262626; /* charcoal */
+  --kbd-bg-color: #242424; /* retained from original */
+  --prompt-text-color: rgba(216, 212, 212, 0.75); /* retained as rgba */
+  --prompt-tip-bg: rgba(112, 48, 196, 0.1); /* retained as rgba */
+  --prompt-tip-icon-color: #B9B1FD; /* retained as rgba */
+  --prompt-info-bg: #073b68; /* Converted rgb(7,59,104,0.8) to hex */
+  --prompt-info-icon-color: #0070c4; /* Changed to primary purple */
+  --prompt-warning-bg: #5a4503; /* Converted rgb(90,69,3,0.88) to hex */
+  --prompt-warning-icon-color: #ffa500; /* Converted rgb(255,165,0,0.8) to hex */
+  --prompt-danger-bg: #5a1c08; /* Converted rgb(86,28,8,0.8) to hex */
+  --prompt-danger-icon-color: #d200b0; /* Changed to secondary magenta */
+
+  /* Tags */
+  --tag-border: #3b4f58; /* Converted rgb(59,79,88) to hex */
+  --tag-shadow: #202121; /* Converted rgb(32,33,33) to hex */
+  --dash-color: #3f4144; /* Converted rgb(63,65,68) to hex */
+  --search-tag-bg: #292828; /* retained from original */
+
+  /* Categories */
+  --categories-border: rgba(40, 42, 45, 0.5); /* Converted rgb(64,66,69,0.5) to hex if possible */
+  --categories-hover-bg: #494b4c; /* Converted rgb(73,75,76) to hex */
+  --categories-icon-hover-color: #b9b1fd; /* purple (primary) */
+
+  /* Archive */
+  --timeline-node-bg: #96989c; /* Converted rgb(150,152,156) to hex */
+  --timeline-color: #3f4144; /* Converted rgb(63,65,68) to hex */
+  --timeline-year-dot-color: #3f4144; /* --timeline-color */
+
+  /* Additional Prompt Classes */
+  [class^='prompt-'] {
+    --link-underline-color: #dbd8d8; /* Converted rgb(219,216,216) to hex */
+  }
+
+  .logo {
+    filter: invert(1) hue-rotate(180deg);
+  }
+
+  .light {
+    display: none;
+  }
+
+  /* Categories */
+  .categories.card,
+  .list-group-item {
+    background-color: #1e1e1e; /* --card-bg */
+  }
+
+  .categories {
+    .card-header {
+      background-color: #292929; /* --card-header-bg */
+    }
+
+    .list-group-item {
+      border-left: none;
+      border-right: none;
+      padding-left: 2rem;
+      border-color: #3b4f58; /* --categories-border */
+
+      &:last-child {
+        border-bottom-color: #1e1e1e; /* --card-bg */
+      }
+    }
+  }
+
+  #archives li:nth-child(odd) {
+    background-image: linear-gradient(
+      to left,
+      #1a1a1e, /* Converted rgb(26,26,30) to hex */
+      #27272d, /* Converted rgb(39,39,45) to hex */
+      #27272d,
+      #27272d,
+      #1a1a1e
+    );
+  }
+
+  /* stylelint-disable-next-line selector-id-pattern */
+  #disqus_thread {
+    color-scheme: none;
+  }
+
+  .iframe-button {
+    background-color: #1b1b1e; /* dark background */
+    color: #fafafa; /* light text */
+    opacity: 0.8;
+    border: 1px solid #444; /* dark border */
+  }
+
+  .iframe-button:hover,
+  .iframe-button.default:hover {
+    opacity: 1;
+    border-color: #888; /* lighter border on hover */
+  }
+
+} /* dark-scheme */
